@@ -1,4 +1,4 @@
--- main.lua
+package.path = package.path .. ";" .. arg[0]:match("(.-)[^/]+$") .. "?.lua"
 
 local Plot = require("plot")
 

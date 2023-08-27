@@ -1,4 +1,6 @@
-Matrix = require "matrix"
+package.path = package.path .. ";" .. arg[0]:match("(.-)[^/]+$") .. "?.lua"
+
+local Matrix = require "matrix"
 
 m = Matrix.fromLuaTable{
   {1, 2, 3, 5},
