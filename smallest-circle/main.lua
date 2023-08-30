@@ -19,19 +19,22 @@ function generateRandomPoints(N, minX, minY, maxX, maxY)
   return points
 end
 
-function AddPoints(points)
+function addPoints(points)
   for _, point in ipairs(points) do
     Plot.addPoint(point.x, point.y)
   end
 end
 
-local points = generateRandomPoints(100, 0, 0, 100, 100)
-AddPoints(points)
+local points = generateRandomPoints(1020, 0, 0, 100, 100)
+addPoints(points)
 
 centerX, centerY, radius = SmallestCircle.dummy(points)
-Plot.addCircle(centerX, centerY, radius, "Dummy", "blue")
+Plot.addCircle(centerX, centerY, radius, "Dummy", "red")
 
-centerX, centerY, radius = SmallestCircle.bruteForce(points)
-Plot.addCircle(centerX, centerY, radius, "Brute Force", "red")
+-- centerX, centerY, radius = SmallestCircle.bruteForce(points)
+-- Plot.addCircle(centerX, centerY, radius, "Brute Force", "green")
+
+centerX, centerY, radius = SmallestCircle.heuristic(points)
+Plot.addCircle(centerX, centerY, radius, "Heuristic", "blue")
 
 Plot.plot()
