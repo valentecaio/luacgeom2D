@@ -1,4 +1,8 @@
+-- add local path to the package path
 package.path = package.path .. ";" .. arg[0]:match("(.-)[^/]+$") .. "?.lua"
+
+-- add matplotlua to the package path
+package.path = package.path .. ";../matplotlua/?.lua"
 
 local Plot = require("matplotlua")
 local SmallestCircle = require("smallest_circle")
@@ -46,5 +50,4 @@ Plot.addCircle(centerX, centerY, radius, "Brute Force", "green")
 centerX, centerY, radius = SmallestCircle.heuristic(points)
 Plot.addCircle(centerX, centerY, radius, "Heuristic", "blue")
 
--- Plot.saveToFile()
 Plot.plot()

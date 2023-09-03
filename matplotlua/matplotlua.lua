@@ -5,8 +5,11 @@
 local cjson = require("cjson")
 local Plot = {}
 
--- Global variables for script and JSON filenames
-Plot.SCRIPT_NAME = "matplotlua.py"
+-- we want to call the Python script locally from the same directory
+local lib_dir = debug.getinfo(1, 'S').source:match[[^@?(.*[\/])[^\/]-$]]
+
+-- global variables for script and JSON filenames
+Plot.SCRIPT_PATH = lib_dir .. "matplotlua.py"
 Plot.JSON_NAME = "matplotlua.json"
 
 Plot.plot_data = {}
@@ -39,7 +42,7 @@ function Plot.addCircle(center_x, center_y, radius, label, color)
   })
 end
 
--- Save plot data to a file with default or specified name
+-- dump plot data to a file with default or specified name
 function Plot.saveToFile(filename)
   filename = filename or Plot.JSON_NAME
   local json_data = cjson.encode(Plot.plot_data)
@@ -52,12 +55,12 @@ function Plot.plot(use_file)
   if use_file then
     -- write to a file and call Python script with file
     Plot.saveToFile()
-    local command = 'python "' .. Plot.SCRIPT_NAME .. '" ' .. Plot.JSON_NAME
+    local command = 'python "' .. Plot.SCRIPT_PATH .. '" ' .. Plot.JSON_NAME
     os.execute(command)
   else
     -- call Python script through a pipe with JSON data
     local json_data = cjson.encode(Plot.plot_data)
-    local pipe = io.popen('python "' .. Plot.SCRIPT_NAME .. '"', 'w')
+    local pipe = io.popen('python "' .. Plot.SCRIPT_PATH .. '"', 'w')
     pipe:write(json_data)
     pipe:close()
   end
