@@ -1,10 +1,12 @@
--- add local path to the package path
-package.path = package.path .. ";" .. arg[0]:match("(.-)[^/]+$") .. "?.lua"
+-- TODO: why does this not work?
+-- local Plot = require("../matplotlua.matplotlua")
+-- local Utils = require("../utils.utils")
 
--- add matplotlua to the package path
-package.path = package.path .. ";../matplotlua/?.lua"
+-- hotfix for the issue above:
+package.path = package.path .. ";../?/?.lua"
 
 local Plot = require("matplotlua")
+local Utils = require("utils")
 local SmallestCircle = require("smallest_circle")
 
 -- generate N random points within a given rectangle
@@ -38,16 +40,19 @@ function addPoints(points)
   end
 end
 
-points = generateRandomPointsInCircle(1000, 0, 0, 100)
+points = generateRandomPointsInCircle(40, 10, 10, 100)
 addPoints(points)
 
-centerX, centerY, radius = SmallestCircle.dummy(points)
-Plot.addCircle(centerX, centerY, radius, "Dummy", "red")
+circle = SmallestCircle.dummy(points)
+Plot.addCircle(circle.x, circle.y, circle.r, "Dummy", "red")
 
-centerX, centerY, radius = SmallestCircle.bruteForce(points)
-Plot.addCircle(centerX, centerY, radius, "Brute Force", "green")
+-- circle = SmallestCircle.bruteForce(points)
+-- Plot.addCircle(circle.x, circle.y, circle.r, "Brute Force", "green")
 
-centerX, centerY, radius = SmallestCircle.heuristic(points)
-Plot.addCircle(centerX, centerY, radius, "Heuristic", "blue")
+circle = SmallestCircle.heuristic(points)
+Plot.addCircle(circle.x, circle.y, circle.r, "Heuristic", "blue")
+
+circle = SmallestCircle.welzl(points)
+Plot.addCircle(circle.x, circle.y, circle.r, "Welzl", "green")
 
 Plot.plot()
