@@ -1,5 +1,6 @@
 local Utils = {}
 
+-- deep copy a table recursively
 function Utils.deepcopy(orig)
   local orig_type = type(orig)
   local copy
@@ -16,6 +17,7 @@ function Utils.deepcopy(orig)
   return copy
 end
 
+-- print a table recursively
 function Utils.printTable(t, name, indent)
   name = name or ''
   indent = indent or ''
@@ -27,6 +29,27 @@ function Utils.printTable(t, name, indent)
       print(indent .. name .. '.' .. k, v)
     end
   end
+end
+
+-- measure the execution time of a function
+function Utils.measureExecutionTime(func, ...)
+  local start_time = os.clock()
+  func(...)
+  local end_time = os.clock()
+  return end_time - start_time
+end
+
+-- generate N random points contained in a given circle
+function Utils.generateRandomPointsInCircle(N, circle)
+  local points = {}
+  for i = 1, N do
+    local angle = math.random() * 2 * math.pi
+    local distance = math.sqrt(math.random()) * circle.r
+    local x = circle.x + distance * math.cos(angle)
+    local y = circle.y + distance * math.sin(angle)
+    table.insert(points, {x = x, y = y})
+  end
+  return points
 end
 
 return Utils
