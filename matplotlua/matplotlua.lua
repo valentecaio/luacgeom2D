@@ -7,7 +7,7 @@ local Plot = {}
 
 -- Global variables for script and JSON filenames
 Plot.SCRIPT_NAME = "matplotlua.py"
-Plot.JSON_NAME = "maplotlua.json"
+Plot.JSON_NAME = "matplotlua.json"
 
 Plot.plot_data = {}
 

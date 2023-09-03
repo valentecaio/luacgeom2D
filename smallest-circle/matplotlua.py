@@ -1,4 +1,4 @@
-# Reads JSON data from a file or stdin and plots curves, circles, and points using Matplotlib.
+# Reads JSON data and plots curves, circles, and points using Matplotlib.
 
 import sys
 import json
@@ -34,6 +34,7 @@ if __name__ == '__main__':
     else:
         # if no argument is provided, read JSON data from stdin
         # that's useful for piping data from another program
+        # example: cat matplotlua.json | python matplotlua.py
         json_data = sys.stdin.read()
         data = json.loads(json_data)
         plot_from_json(data)

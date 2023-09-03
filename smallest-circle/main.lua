@@ -46,4 +46,5 @@ Plot.addCircle(centerX, centerY, radius, "Brute Force", "green")
 centerX, centerY, radius = SmallestCircle.heuristic(points)
 Plot.addCircle(centerX, centerY, radius, "Heuristic", "blue")
 
+-- Plot.saveToFile()
 Plot.plot()
