@@ -1,13 +1,13 @@
 package.path = package.path .. ";../?/?.lua"
 local Utils = require("utils")
 
-local SmallestCircle = {}
+local EnclosingCircle = {}
 
 ------- PUBLIC METHODS -------
 
 -- dummiest way to find any enclosing circle
 -- the returned circle contains the rectangle containing all the points
-function SmallestCircle.dummy(points)
+function EnclosingCircle.dummy(points)
   local minX, maxX, minY, maxY = _findMinMaxCoordinates(points)
   local centerX = (minX + maxX) / 2
   local centerY = (minY + maxY) / 2
@@ -17,7 +17,7 @@ end
 
 -- dummiest way to find the smallest enclosing circle
 -- should be O(n^4)
-function SmallestCircle.bruteForce(points)
+function EnclosingCircle.bruteForce(points)
   local minX, maxX, minY, maxY = _findMinMaxCoordinates(points)
   local centerX, centerY, radius = 0, 0, math.huge
 
@@ -38,7 +38,7 @@ end
 
 -- heuristic method to find any enclosing circle
 -- the returned circle is not necessarily the smallest, but a good O(n) approximation
-function SmallestCircle.heuristic(points)
+function EnclosingCircle.heuristic(points)
   local minXIndex, maxXIndex = _findMinMaxIndexes(points)
   local minXPoint, maxXPoint = points[minXIndex], points[maxXIndex]
   local centerX = (minXPoint.x + maxXPoint.x) / 2
@@ -61,7 +61,7 @@ end
 
 -- Welzl's algorithm to find the smallest enclosing circle
 -- should be O(n) on average, but O(n^4) in the worst case
-function SmallestCircle.welzl(points, n, boundary)
+function EnclosingCircle.welzl(points, n, boundary)
   -- default values for the first call
   boundary = boundary or {}
   n = n or #points
@@ -74,7 +74,7 @@ function SmallestCircle.welzl(points, n, boundary)
 
   -- pick the last point from the set. Now the set length is n-1
   local point = points[n]
-  local circle = SmallestCircle.welzl(points, n-1, Utils.deepcopy(boundary))
+  local circle = EnclosingCircle.welzl(points, n-1, Utils.deepcopy(boundary))
 
   -- if the point is inside the circle, return the circle
   -- otherwise, the point must be on the boundary of the circle
@@ -84,12 +84,12 @@ function SmallestCircle.welzl(points, n, boundary)
     table.insert(boundary, point)
     -- Utils.printTable(boundary, "boundary", "  ")
     -- TODO: check why we dont need to deepcopy here (?)
-    return SmallestCircle.welzl(points, n-1, boundary)
+    return EnclosingCircle.welzl(points, n-1, boundary)
   end
 end
 
 -- check if a circle encloses all points
-function SmallestCircle.validateCircle(circle, points)
+function EnclosingCircle.validateCircle(circle, points)
   for _, point in ipairs(points) do
     if _eucl_distance(circle.x, circle.y, point.x, point.y) > circle.r then
       return false
@@ -135,7 +135,7 @@ end
 
 -- returns a circle containing all the points in the boundary
 -- the circle is the smallest circle containing the points in the boundary
--- it is assumed that the boundary is a set of 0, 1, 2 or 3 points
+-- it is assumed that the boundary is a set of 0 to 3 points
 function _makeCircle(boundary)
   assert(#boundary <= 3)
   local p1, p2, p3 = boundary[1], boundary[2], boundary[3]
@@ -168,4 +168,4 @@ function _makeCircle(boundary)
   end
 end
 
-return SmallestCircle
+return EnclosingCircle

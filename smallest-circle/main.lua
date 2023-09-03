@@ -7,7 +7,7 @@ package.path = package.path .. ";../?/?.lua"
 
 local Plot = require("matplotlua")
 local Utils = require("utils")
-local SmallestCircle = require("smallest_circle")
+local EnclosingCircle = require("enclosing_circle")
 
 -- generate N random points within a given rectangle
 function generateRandomPoints(N, minX, minY, maxX, maxY)
@@ -44,26 +44,26 @@ circle = {x = 0, y = 0, r = 100}
 Utils.printTable(circle, "Circle")
 points = generateRandomPointsInCircle(40, circle.x, circle.y, circle.r)
 addPoints(points)
-print(SmallestCircle.validateCircle(circle, points))
+print(EnclosingCircle.validateCircle(circle, points))
 
-circle = SmallestCircle.dummy(points)
+circle = EnclosingCircle.dummy(points)
 Plot.addCircle(circle.x, circle.y, circle.r, "Dummy", "red")
 Utils.printTable(circle, "Dummy")
-print(SmallestCircle.validateCircle(circle, points))
+print(EnclosingCircle.validateCircle(circle, points))
 
-circle = SmallestCircle.heuristic(points)
+circle = EnclosingCircle.heuristic(points)
 Plot.addCircle(circle.x, circle.y, circle.r, "Heuristic", "blue")
 Utils.printTable(circle, "Heuristic")
-print(SmallestCircle.validateCircle(circle, points))
+print(EnclosingCircle.validateCircle(circle, points))
 
-circle = SmallestCircle.bruteForce(points)
+circle = EnclosingCircle.bruteForce(points)
 Plot.addCircle(circle.x, circle.y, circle.r, "Brute Force", "yellow")
 Utils.printTable(circle, "Brute Force")
-print(SmallestCircle.validateCircle(circle, points))
+print(EnclosingCircle.validateCircle(circle, points))
 
-circle, boundary = SmallestCircle.welzl(points)
+circle, boundary = EnclosingCircle.welzl(points)
 Plot.addCircle(circle.x, circle.y, circle.r, "Welzl", "green")
 Utils.printTable(circle, "Welzl")
-print(SmallestCircle.validateCircle(circle, points))
+print(EnclosingCircle.validateCircle(circle, points))
 
 Plot.plot()
