@@ -6,28 +6,34 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
 
 def plot_from_json(json_data):
-    for obj in json_data:
-        obj_type = obj['type'] # mandatory
+    plt.clf()
+
+    for obj in json_data['points']:
         label = obj.get('label') # default to None
         color = obj.get('color') # default to None
-        if obj_type == 'point':
-            plt.plot(obj['x'], obj['y'], 'o', label=label)
-        elif obj_type == 'curve':
-            plt.plot(obj['x'], obj['y'], label=label)
-        elif obj_type == 'polygon':
-            vertices = obj['vertices']
-            polygon = Polygon(vertices, closed=True, fill=False, color=color, label=label)
-            plt.gca().add_patch(polygon)
-        elif obj_type == 'circle':
-            center = obj['center']
-            radius = obj['radius']
-            circle = plt.Circle((center['x'], center['y']), radius, color=color, label=label, fill=False)
-            plt.gca().add_patch(circle)
+        plt.plot(obj['x'], obj['y'], 'o', label=label)
+    for obj in json_data['curves']:
+        label = obj.get('label')
+        color = obj.get('color')
+        plt.plot(obj['x'], obj['y'], label=label)
+    for obj in json_data['polygons']:
+        label = obj.get('label')
+        color = obj.get('color')
+        vertices = obj['vertices']
+        polygon = Polygon(vertices, closed=True, fill=False, color=color, label=label)
+        plt.gca().add_patch(polygon)
+    for obj in json_data['circles']:
+        label = obj.get('label')
+        color = obj.get('color')
+        center = obj['center']
+        radius = obj['radius']
+        circle = plt.Circle((center['x'], center['y']), radius, color=color, label=label, fill=False)
+        plt.gca().add_patch(circle)
 
     plt.legend()
-    plt.xlabel('X')
-    plt.ylabel('Y')
-    plt.title('MatPlotLua')
+    plt.xlabel(json_data['xlabel'] if 'xlabel' in json_data else 'X')
+    plt.ylabel(json_data['ylabel'] if 'ylabel' in json_data else 'Y')
+    plt.title(json_data['title'] if 'title' in json_data else 'MatPlotLua')
     plt.show()
 
 if __name__ == '__main__':
