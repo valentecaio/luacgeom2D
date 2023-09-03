@@ -46,9 +46,9 @@ points = generateRandomPointsInCircle(40, circle.x, circle.y, circle.r)
 addPoints(points)
 print(EnclosingCircle.validateCircle(circle, points))
 
-circle = EnclosingCircle.dummy(points)
-Plot.addCircle(circle.x, circle.y, circle.r, "Dummy", "red")
-Utils.printTable(circle, "Dummy")
+circle = EnclosingCircle.dumb(points)
+Plot.addCircle(circle.x, circle.y, circle.r, "Dumb", "red")
+Utils.printTable(circle, "Dumb")
 print(EnclosingCircle.validateCircle(circle, points))
 
 circle = EnclosingCircle.heuristic(points)

@@ -5,14 +5,14 @@ local EnclosingCircle = {}
 
 ------- PUBLIC METHODS -------
 
--- dummiest way to find any enclosing circle
+-- dumbest way to find any enclosing circle
 -- the returned circle encloses the rectangle containing all the points
-function EnclosingCircle.dummy(points)
+function EnclosingCircle.dumb(points)
   local minX, maxX, minY, maxY = _findMinMaxCoordinates(points)
   return _makeCircle({{x = minX, y = minY}, {x = maxX, y = maxY}})
 end
 
--- dummiest way to find the smallest enclosing circle
+-- dumbest way to find the smallest enclosing circle
 -- should be O(n^4)
 function EnclosingCircle.bruteForce(points)
   local minX, maxX, minY, maxY = _findMinMaxCoordinates(points)
