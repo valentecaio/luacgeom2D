@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 # Reads JSON data and plots curves, circles, and points using Matplotlib.
 
 import sys

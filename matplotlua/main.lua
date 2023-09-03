@@ -1,3 +1,5 @@
+#!/usr/bin/lua
+
 -- this file is just an example of how to use the library
 
 package.path = package.path .. ";" .. arg[0]:match("(.-)[^/]+$") .. "?.lua"
