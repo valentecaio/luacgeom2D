@@ -61,19 +61,20 @@ end
 
 -- Welzl's algorithm to find the smallest circle containing all the points
 -- should be O(n) on average, but O(n^4) in the worst case
-function SmallestCircle.welzl(points, boundary)
-  boundary = boundary or {} -- default value for the first call
-  
+function SmallestCircle.welzl(points, n, boundary)
+  -- default values for the first call
+  boundary = boundary or {}
+  n = n or #points
+
   -- base case: if there are no points or 3 points in the boundary,
   -- return the smallest circle enclosing the boundary
-  if #points == 0 or #boundary == 3 then
+  if n == 0 or #boundary == 3 then
     return _makeCircle(boundary)
   end
 
-  -- pick a random point from the set
-  -- we need deepcopies because the points are modified in the recursion
-  local point = table.remove(points, 1)
-  local circle = SmallestCircle.welzl(Utils.deepcopy(points), Utils.deepcopy(boundary))
+  -- pick the last point from the set. Now the set length is n-1
+  local point = points[n]
+  local circle = SmallestCircle.welzl(points, n-1, Utils.deepcopy(boundary))
 
   -- if the point is inside the circle, return the circle
   -- otherwise, the point must be on the boundary of the circle
@@ -83,7 +84,7 @@ function SmallestCircle.welzl(points, boundary)
     table.insert(boundary, point)
     -- Utils.printTable(boundary, "boundary", "  ")
     -- TODO: check why we dont need to deepcopy here (?)
-    return SmallestCircle.welzl(points, boundary)
+    return SmallestCircle.welzl(points, n-1, boundary)
   end
 end
 
