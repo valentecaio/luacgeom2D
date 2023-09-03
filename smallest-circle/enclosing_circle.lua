@@ -6,13 +6,10 @@ local EnclosingCircle = {}
 ------- PUBLIC METHODS -------
 
 -- dummiest way to find any enclosing circle
--- the returned circle contains the rectangle containing all the points
+-- the returned circle encloses the rectangle containing all the points
 function EnclosingCircle.dummy(points)
   local minX, maxX, minY, maxY = _findMinMaxCoordinates(points)
-  local centerX = (minX + maxX) / 2
-  local centerY = (minY + maxY) / 2
-  local radius = _eucl_distance(maxX, maxY, minX, minY) / 2
-  return {x = centerX, y = centerY, r = radius}
+  return _makeCircle({{x = minX, y = minY}, {x = maxX, y = maxY}})
 end
 
 -- dummiest way to find the smallest enclosing circle
@@ -25,7 +22,7 @@ function EnclosingCircle.bruteForce(points)
     for y = minY, maxY do
       local maxDist = 0
       for _, point in ipairs(points) do
-        maxDist = math.max(maxDist, _eucl_distance(x, y, point.x, point.y))
+        maxDist = math.max(maxDist, _eucl_distance({x=x, y=y}, point))
       end
       if maxDist < radius then
         centerX, centerY, radius = x, y, maxDist
@@ -36,27 +33,24 @@ function EnclosingCircle.bruteForce(points)
   return {x = centerX, y = centerY, r = radius}
 end
 
--- heuristic method to find any enclosing circle
--- the returned circle is not necessarily the smallest, but a good O(n) approximation
+-- heuristic method to find any enclosing circle in O(n)
+-- the returned circle is not necessarily the smallest, but a good approximation
 function EnclosingCircle.heuristic(points)
   local minXIndex, maxXIndex = _findMinMaxIndexes(points)
-  local minXPoint, maxXPoint = points[minXIndex], points[maxXIndex]
-  local centerX = (minXPoint.x + maxXPoint.x) / 2
-  local centerY = (minXPoint.y + maxXPoint.y) / 2
-  local radius = _eucl_distance(maxXPoint.x, maxXPoint.y, minXPoint.x, minXPoint.y) / 2
+  local circle = _makeCircle({points[minXIndex], points[maxXIndex]})
 
   for _, point in ipairs(points) do
-    local distance = _eucl_distance(centerX, centerY, point.x, point.y)
-    if distance > radius then
-      local newRadius = (radius + distance) / 2
-      local ratio = (newRadius - radius) / distance
-      centerX = centerX + (point.x - centerX) * ratio
-      centerY = centerY + (point.y - centerY) * ratio
-      radius = newRadius
+    local distance = _eucl_distance(circle, point)
+    if distance > circle.r then
+      local newRadius = (circle.r + distance) / 2
+      local ratio = (newRadius - circle.r) / distance
+      circle.x = circle.x + (point.x - circle.x) * ratio
+      circle.y = circle.y + (point.y - circle.y) * ratio
+      circle.r = newRadius
     end
   end
 
-  return {x = centerX, y = centerY, r = radius}
+  return circle
 end
 
 -- Welzl's algorithm to find the smallest enclosing circle
@@ -78,7 +72,7 @@ function EnclosingCircle.welzl(points, n, boundary)
 
   -- if the point is inside the circle, return the circle
   -- otherwise, the point must be on the boundary of the circle
-  if _eucl_distance(circle.x, circle.y, point.x, point.y) <= circle.r then
+  if _eucl_distance(circle, point) <= circle.r then
     return circle
   else
     table.insert(boundary, point)
@@ -91,7 +85,7 @@ end
 -- check if a circle encloses all points
 function EnclosingCircle.validateCircle(circle, points)
   for _, point in ipairs(points) do
-    if _eucl_distance(circle.x, circle.y, point.x, point.y) > circle.r then
+    if _eucl_distance(circle, point) > circle.r then
       return false
     end
   end
@@ -100,8 +94,8 @@ end
 
 ------- PRIVATE METHODS -------
 
-function _eucl_distance(x1, y1, x2, y2)
-  return math.sqrt((x1-x2)^2 + (y1-y2)^2)
+function _eucl_distance(p1, p2)
+  return math.sqrt((p1.x-p2.x)^2 + (p1.y-p2.y)^2)
 end
 
 -- returns the indexes of minX, maxX, minY and maxY
@@ -146,8 +140,11 @@ function _makeCircle(boundary)
   elseif #boundary == 2 then
     -- if there are just two points in the boundary, the circle containing
     -- them is the circle with the segment between them as diameter
-    local radius = _eucl_distance(p1.x, p1.y, p2.x, p2.y) / 2
-    return {x = (p1.x+p2.x)/2, y = (p1.y+p2.y)/2, r = radius}
+    return {
+      x = (p1.x + p2.x) / 2,
+      y = (p1.y + p2.y) / 2,
+      r = _eucl_distance(p1, p2) / 2
+    }
   else
     -- find the center of the circle by solving the system of equations:
     -- (x - x1)^2 + (y - y1)^2 = r^2
@@ -163,7 +160,7 @@ function _makeCircle(boundary)
     local F = x3^2 + y3^2 - x2^2 - y2^2
     local centerX = (C*E - F*B) / (E*A - B*D)
     local centerY = (C*D - A*F) / (B*D - A*E)
-    local radius = _eucl_distance(centerX, centerY, x1, y1)
+    local radius = _eucl_distance({x=centerX, y=centerY}, p1)
     return {x = centerX, y = centerY, r = radius}
   end
 end
