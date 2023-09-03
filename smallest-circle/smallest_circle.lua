@@ -2,6 +2,7 @@ local SmallestCircle = {}
 
 ------- PUBLIC METHODS -------
 
+-- dummiest way to find any circle containing all the points
 function SmallestCircle.dummy(points)
   local minX, maxX, minY, maxY = _findMinMaxCoordinates(points)
   local centerX = (minX + maxX) / 2
@@ -10,6 +11,7 @@ function SmallestCircle.dummy(points)
   return centerX, centerY, radius
 end
 
+-- dummiest way to find the smallest circle containing all the points
 function SmallestCircle.bruteForce(points)
   local minX, maxX, minY, maxY = _findMinMaxCoordinates(points)
   local centerX, centerY, radius = 0, 0, math.huge
@@ -29,6 +31,8 @@ function SmallestCircle.bruteForce(points)
   return centerX, centerY, radius
 end
 
+-- heuristic method to find any circle containing all the points
+-- the returned circle is not necessarily the smallest, but it is a good approximation
 function SmallestCircle.heuristic(points)
   local minXIndex, maxXIndex = _findMinMaxIndexes(points)
   local minXPoint, maxXPoint = points[minXIndex], points[maxXIndex]
