@@ -1,6 +1,6 @@
 package.path = package.path .. ";" .. arg[0]:match("(.-)[^/]+$") .. "?.lua"
 
-local Plot = require("plot")
+local Plot = require("matplotlua")
 
 -- Add plot objects using the new functions
 Plot.addPoint({2.5, 3, 1.8, 2.2}, {5.5, 7, 6.2, 6.8})

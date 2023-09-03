@@ -1,4 +1,3 @@
--- plot.lua
 -- This module provides functions to add plot objects (points, curves, circles)
 -- and generate plots using a Python script. It allows data to be saved to a
 -- JSON file or passed directly through a pipe to the Python script.
@@ -7,8 +6,8 @@ local cjson = require("cjson")
 local Plot = {}
 
 -- Global variables for script and JSON filenames
-Plot.SCRIPT_NAME = "plot.py"
-Plot.JSON_NAME = "plot.json"
+Plot.SCRIPT_NAME = "matplotlua.py"
+Plot.JSON_NAME = "maplotlua.json"
 
 Plot.plot_data = {}
 

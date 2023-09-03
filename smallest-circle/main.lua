@@ -1,6 +1,6 @@
 package.path = package.path .. ";" .. arg[0]:match("(.-)[^/]+$") .. "?.lua"
 
-local Plot = require("plot")
+local Plot = require("matplotlua")
 local SmallestCircle = require("smallest_circle")
 
 -- generate N random points within a given rectangle

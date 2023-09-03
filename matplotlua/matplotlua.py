@@ -1,4 +1,3 @@
-# plot.py
 # Reads JSON data from a file or stdin and plots curves, circles, and points using Matplotlib.
 
 import sys
@@ -7,7 +6,7 @@ import matplotlib.pyplot as plt
 
 def plot_from_json(json_data):
     for obj in json_data:
-        obj_type = obj['type']
+        obj_type = obj['type'] # mandatory
         label = obj.get('label') # default to None
         color = obj.get('color') # default to None
         if obj_type == 'point':
@@ -23,7 +22,7 @@ def plot_from_json(json_data):
     plt.legend()
     plt.xlabel('X')
     plt.ylabel('Y')
-    plt.title('Plot generated from JSON data')
+    plt.title('MatPlotLua')
     plt.show()
 
 if __name__ == '__main__':
@@ -34,6 +33,7 @@ if __name__ == '__main__':
             plot_from_json(data)
     else:
         # if no argument is provided, read JSON data from stdin
+        # that's useful for piping data from another program
         json_data = sys.stdin.read()
         data = json.loads(json_data)
         plot_from_json(data)
