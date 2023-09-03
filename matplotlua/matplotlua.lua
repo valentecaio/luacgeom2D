@@ -58,7 +58,7 @@ end
 function Plot.addCircle(circle, label, color)
   table.insert(Plot.state.circles, {
     center = {x = circle.x, y = circle.y},
-    radius = circle.y,
+    radius = circle.r,
     label = label,
     color = color,
   })
