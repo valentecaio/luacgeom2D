@@ -42,6 +42,19 @@ function Plot.addCircle(center_x, center_y, radius, label, color)
   })
 end
 
+function Plot.addPolygon(points, label, color)
+  local vertices = {}
+  for _, point in ipairs(points) do
+    table.insert(vertices, {point.x, point.y})
+  end
+  table.insert(Plot.plot_data, {
+    type = "polygon",
+    vertices = vertices,
+    label = label,
+    color = color,
+  })
+end
+
 -- dump plot data to a file with default or specified name
 function Plot.saveToFile(filename)
   filename = filename or Plot.JSON_NAME

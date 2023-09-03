@@ -3,6 +3,7 @@
 import sys
 import json
 import matplotlib.pyplot as plt
+from matplotlib.patches import Polygon
 
 def plot_from_json(json_data):
     for obj in json_data:
@@ -13,6 +14,10 @@ def plot_from_json(json_data):
             plt.plot(obj['x'], obj['y'], 'o', label=label)
         elif obj_type == 'curve':
             plt.plot(obj['x'], obj['y'], label=label)
+        elif obj_type == 'polygon':
+            vertices = obj['vertices']
+            polygon = Polygon(vertices, closed=True, fill=False, color=color, label=label)
+            plt.gca().add_patch(polygon)
         elif obj_type == 'circle':
             center = obj['center']
             radius = obj['radius']
