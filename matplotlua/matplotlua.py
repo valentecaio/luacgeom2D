@@ -40,6 +40,7 @@ def plot_from_json(json_data):
 
 if __name__ == '__main__':
     if len(sys.argv) == 2:
+        # example: python matplotlua.py example.json
         json_filename = sys.argv[1]
         with open(json_filename, 'r') as json_file:
             data = json.load(json_file)
@@ -47,7 +48,7 @@ if __name__ == '__main__':
     else:
         # if no argument is provided, read JSON data from stdin
         # that's useful for piping data from another program
-        # example: cat matplotlua.json | python matplotlua.py
+        # example: cat example.json | python matplotlua.py
         json_data = sys.stdin.read()
         data = json.loads(json_data)
         plot_from_json(data)
