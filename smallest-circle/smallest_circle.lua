@@ -5,7 +5,7 @@ local SmallestCircle = {}
 
 ------- PUBLIC METHODS -------
 
--- dummiest way to find any circle containing all the points
+-- dummiest way to find any enclosing circle
 -- the returned circle contains the rectangle containing all the points
 function SmallestCircle.dummy(points)
   local minX, maxX, minY, maxY = _findMinMaxCoordinates(points)
@@ -15,7 +15,7 @@ function SmallestCircle.dummy(points)
   return {x = centerX, y = centerY, r = radius}
 end
 
--- dummiest way to find the smallest circle containing all the points
+-- dummiest way to find the smallest enclosing circle
 -- should be O(n^4)
 function SmallestCircle.bruteForce(points)
   local minX, maxX, minY, maxY = _findMinMaxCoordinates(points)
@@ -36,7 +36,7 @@ function SmallestCircle.bruteForce(points)
   return {x = centerX, y = centerY, r = radius}
 end
 
--- heuristic method to find any circle containing all the points
+-- heuristic method to find any enclosing circle
 -- the returned circle is not necessarily the smallest, but a good O(n) approximation
 function SmallestCircle.heuristic(points)
   local minXIndex, maxXIndex = _findMinMaxIndexes(points)
@@ -59,7 +59,7 @@ function SmallestCircle.heuristic(points)
   return {x = centerX, y = centerY, r = radius}
 end
 
--- Welzl's algorithm to find the smallest circle containing all the points
+-- Welzl's algorithm to find the smallest enclosing circle
 -- should be O(n) on average, but O(n^4) in the worst case
 function SmallestCircle.welzl(points, n, boundary)
   -- default values for the first call
@@ -88,10 +88,20 @@ function SmallestCircle.welzl(points, n, boundary)
   end
 end
 
+-- check if a circle encloses all points
+function SmallestCircle.validateCircle(circle, points)
+  for _, point in ipairs(points) do
+    if _eucl_distance(circle.x, circle.y, point.x, point.y) > circle.r then
+      return false
+    end
+  end
+  return true
+end
+
 ------- PRIVATE METHODS -------
 
 function _eucl_distance(x1, y1, x2, y2)
-  return math.sqrt((x1 - x2)^2 + (y1 - y2)^2)
+  return math.sqrt((x1-x2)^2 + (y1-y2)^2)
 end
 
 -- returns the indexes of minX, maxX, minY and maxY
