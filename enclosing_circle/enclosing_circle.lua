@@ -1,7 +1,84 @@
 package.path = package.path .. ";../?/?.lua"
 local Utils = require("utils")
+local ConvexHull = require("convex_hull")
 
 local EnclosingCircle = {}
+
+
+------- PRIVATE METHODS -------
+
+-- returns the euclidean distance between two points
+local function _eucl_distance(p1, p2)
+  return math.sqrt((p1.x-p2.x)^2 + (p1.y-p2.y)^2)
+end
+
+-- returns the indexes of minX, maxX, minY and maxY
+local function _findMinMaxIndexes(points)
+  local minX, maxX, minY, maxY = math.huge, -math.huge, math.huge, -math.huge
+  local minXIndex, maxXIndex, minYIndex, maxYIndex = 0, 0, 0, 0
+
+  for i, point in ipairs(points) do
+    if point.x < minX then
+      minX, minXIndex = point.x, i
+    end
+    if point.x > maxX then
+      maxX, maxXIndex = point.x, i
+    end
+    if point.y < minY then
+      minY, minYIndex = point.y, i
+    end
+    if point.y > maxY then
+      maxY, maxYIndex = point.y, i
+    end
+  end
+
+  return minXIndex, maxXIndex, minYIndex, maxYIndex
+end
+
+-- returns the coordinates of minX, maxX, minY and maxY
+local function _findMinMaxCoordinates(points)
+  local minXid, maxXid, minYid, maxYid = _findMinMaxIndexes(points)
+  return points[minXid].x, points[maxXid].x, points[minYid].y, points[maxYid].y
+end
+
+-- returns a circle containing all the points in the boundary
+-- the circle is the smallest circle containing the points in the boundary
+-- it is assumed that the boundary is a set of 0 to 3 points
+local function _makeCircle(boundary)
+  assert(#boundary <= 3)
+  local p1, p2, p3 = boundary[1], boundary[2], boundary[3]
+  if #boundary == 0 then
+    return {x = 0, y = 0, r = 0}
+  elseif #boundary == 1 then
+    return {x = p1.x, y = p1.y, r = 0}
+  elseif #boundary == 2 then
+    -- if there are just two points in the boundary, the circle containing
+    -- them is the circle with the segment between them as diameter
+    return {
+      x = (p1.x + p2.x) / 2,
+      y = (p1.y + p2.y) / 2,
+      r = _eucl_distance(p1, p2) / 2
+    }
+  else
+    -- find the center of the circle by solving the system of equations:
+    -- (x - x1)^2 + (y - y1)^2 = r^2
+    -- (x - x2)^2 + (y - y2)^2 = r^2
+    -- (x - x3)^2 + (y - y3)^2 = r^2
+    -- the solution is the intersection of the three perpendicular bisectors
+    local x1, y1, x2, y2, x3, y3 = p1.x, p1.y, p2.x, p2.y, p3.x, p3.y
+    local A = 2 * (x2 - x1)
+    local B = 2 * (y2 - y1)
+    local C = x2^2 + y2^2 - x1^2 - y1^2
+    local D = 2 * (x3 - x2)
+    local E = 2 * (y3 - y2)
+    local F = x3^2 + y3^2 - x2^2 - y2^2
+    local centerX = (C*E - F*B) / (E*A - B*D)
+    local centerY = (C*D - A*F) / (B*D - A*E)
+    local radius = _eucl_distance({x=centerX, y=centerY}, p1)
+    return {x = centerX, y = centerY, r = radius}
+  end
+end
+
 
 ------- PUBLIC METHODS -------
 
@@ -82,7 +159,16 @@ function EnclosingCircle.welzl(points, n, boundary)
   end
 end
 
--- check if a circle encloses all points
+-- Smolik's algorithm to find the smallest enclosing circle
+-- based on the paper "Efficient Speed-Up of the Smallest Enclosing Circle Algorithm"
+-- available at https://informatica.vu.lt/journal/INFORMATICA/article/1251
+function EnclosingCircle.smolik(points)
+  local convex_hull = ConvexHull.skala(points)
+  Utils.shuffle(convex_hull)
+  return EnclosingCircle.welzl(convex_hull)
+end
+
+-- check if a circle encloses a given set of points
 function EnclosingCircle.validateCircle(circle, points)
   for _, point in ipairs(points) do
     if _eucl_distance(circle, point) > circle.r then
@@ -92,77 +178,5 @@ function EnclosingCircle.validateCircle(circle, points)
   return true
 end
 
-------- PRIVATE METHODS -------
-
-function _eucl_distance(p1, p2)
-  return math.sqrt((p1.x-p2.x)^2 + (p1.y-p2.y)^2)
-end
-
--- returns the indexes of minX, maxX, minY and maxY
-function _findMinMaxIndexes(points)
-  local minX, maxX, minY, maxY = math.huge, -math.huge, math.huge, -math.huge
-  local minXIndex, maxXIndex, minYIndex, maxYIndex = 0, 0, 0, 0
-
-  for i, point in ipairs(points) do
-    if point.x < minX then
-      minX, minXIndex = point.x, i
-    end
-    if point.x > maxX then
-      maxX, maxXIndex = point.x, i
-    end
-    if point.y < minY then
-      minY, minYIndex = point.y, i
-    end
-    if point.y > maxY then
-      maxY, maxYIndex = point.y, i
-    end
-  end
-
-  return minXIndex, maxXIndex, minYIndex, maxYIndex
-end
-
--- returns the coordinates of minX, maxX, minY and maxY
-function _findMinMaxCoordinates(points)
-  local minXid, maxXid, minYid, maxYid = _findMinMaxIndexes(points)
-  return points[minXid].x, points[maxXid].x, points[minYid].y, points[maxYid].y
-end
-
--- returns a circle containing all the points in the boundary
--- the circle is the smallest circle containing the points in the boundary
--- it is assumed that the boundary is a set of 0 to 3 points
-function _makeCircle(boundary)
-  assert(#boundary <= 3)
-  local p1, p2, p3 = boundary[1], boundary[2], boundary[3]
-  if #boundary == 0 then
-    return {x = 0, y = 0, r = 0}
-  elseif #boundary == 1 then
-    return {x = p1.x, y = p1.y, r = 0}
-  elseif #boundary == 2 then
-    -- if there are just two points in the boundary, the circle containing
-    -- them is the circle with the segment between them as diameter
-    return {
-      x = (p1.x + p2.x) / 2,
-      y = (p1.y + p2.y) / 2,
-      r = _eucl_distance(p1, p2) / 2
-    }
-  else
-    -- find the center of the circle by solving the system of equations:
-    -- (x - x1)^2 + (y - y1)^2 = r^2
-    -- (x - x2)^2 + (y - y2)^2 = r^2
-    -- (x - x3)^2 + (y - y3)^2 = r^2
-    -- the solution is the intersection of the three perpendicular bisectors
-    local x1, y1, x2, y2, x3, y3 = p1.x, p1.y, p2.x, p2.y, p3.x, p3.y
-    local A = 2 * (x2 - x1)
-    local B = 2 * (y2 - y1)
-    local C = x2^2 + y2^2 - x1^2 - y1^2
-    local D = 2 * (x3 - x2)
-    local E = 2 * (y3 - y2)
-    local F = x3^2 + y3^2 - x2^2 - y2^2
-    local centerX = (C*E - F*B) / (E*A - B*D)
-    local centerY = (C*D - A*F) / (B*D - A*E)
-    local radius = _eucl_distance({x=centerX, y=centerY}, p1)
-    return {x = centerX, y = centerY, r = radius}
-  end
-end
 
 return EnclosingCircle

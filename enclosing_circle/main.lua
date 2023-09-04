@@ -1,69 +1,120 @@
--- TODO: why does this not work?
--- local Plot = require("../matplotlua.matplotlua")
--- local Utils = require("../utils.utils")
+#!/usr/bin/lua
 
--- hotfix for the issue above:
 package.path = package.path .. ";../?/?.lua"
-
 local Plot = require("matplotlua")
 local Utils = require("utils")
 local EnclosingCircle = require("enclosing_circle")
+local ConvexHull = require("convex_hull")
 
--- generate N random points within a given rectangle
-function generateRandomPoints(N, minX, minY, maxX, maxY)
-  local points = {}
-  for i = 1, N do
-    local x = math.random(minX, maxX)
-    local y = math.random(minY, maxY)
-    table.insert(points, {x = x, y = y})
-  end
-  return points
+local cmds = {"complexity", "compare", "dumb", "heuristic", "bruteforce", "welzl", "smolik"}
+local cmds_str = table.concat(cmds, "|")
+if (not arg[1]) or (not string.find(cmds_str, arg[1])) then
+  print("Usage: lua main.lua [" .. cmds_str .. "]")
+  return
 end
 
--- generate N random points contained in a given circle
-function generateRandomPointsInCircle(N, centerX, centerY, radius)
-  local points = {}
-  for i = 1, N do
-    local angle = math.random() * 2 * math.pi
-    local distance = math.sqrt(math.random()) * radius
-    local x = centerX + distance * math.cos(angle)
-    local y = centerY + distance * math.sin(angle)
-    table.insert(points, {x = x, y = y})
+local base_circle = {x = 0, y = 0, r = 100}
+local rand_points = Utils.generateRandomPointsInCircle(100, base_circle)
+
+if arg[1] == "complexity" then
+  -- init data to be plotted
+  local sizes = {}
+  local dumbTimes = {}
+  local heuristicTimes = {}
+  local bruteforceTimes = {}
+  local welzlTimes = {}
+  local smolikTimes = {}
+
+  -- parameters for the analysis
+  local min = 100
+  local max = 1000
+  local step = 10
+
+  -- used to print progress
+  local totalIterations = (max - min) / step + 1
+  local count = -1
+
+  for size = min, max, step do
+    local points = Utils.generateRandomPointsInCircle(size, base_circle)
+    local dumbTime = Utils.measureExecutionTime(EnclosingCircle.dumb, points)
+    local heuristicTime = Utils.measureExecutionTime(EnclosingCircle.heuristic, points)
+    -- local bruteforceTime = Utils.measureExecutionTime(EnclosingCircle.bruteForce, points)
+    local welzlTime = Utils.measureExecutionTime(EnclosingCircle.welzl, points)
+    local smolikTime = Utils.measureExecutionTime(EnclosingCircle.smolik, points)
+
+    table.insert(sizes, size)
+    table.insert(dumbTimes, dumbTime)
+    table.insert(heuristicTimes, heuristicTime)
+    -- table.insert(bruteforceTimes, bruteforceTime)
+    table.insert(welzlTimes, welzlTime)
+    table.insert(smolikTimes, smolikTime)
+
+    count = count+1
+    if count % 10 == 0 then
+      print(string.format("Progress: %.1f%%", #sizes / totalIterations * 100))
+    end
   end
-  return points
-end
 
--- add points to the plot
-function addPoints(points)
-  for _, point in ipairs(points) do
-    Plot.addPoint(point.x, point.y)
+  Plot.init{title = "Enclosing Circle Execution Time", xlabel = "Number of points", ylabel = "Time (s)"}
+  Plot.addCurve(sizes, dumbTimes, "Dumb", "red")
+  Plot.addCurve(sizes, heuristicTimes, "Heuristic", "green")
+  -- Plot.addCurve(sizes, bruteforceTimes, "Brute Force", "blue")
+  Plot.addCurve(sizes, welzlTimes, "Welzl", "blue")
+  Plot.addCurve(sizes, smolikTimes, "Smolik", "brown")
+  Plot.plot()
+
+elseif arg[1] == "compare" then
+  Plot.init{title = "Enclosing Circle Comparison", xlabel = "x", ylabel = "y"}
+  Plot.addPointList(rand_points)
+
+  local circle = EnclosingCircle.dumb(rand_points)
+  print("Dumb:      " .. Utils.tableToString(circle))
+  Plot.addCircle(circle, "Dumb", "red")
+
+  circle = EnclosingCircle.heuristic(rand_points)
+  print("Heuristic: " .. Utils.tableToString(circle))
+  Plot.addCircle(circle, "Heuristic", "green")
+
+  circle = EnclosingCircle.welzl(rand_points)
+  print("Welzl:     " .. Utils.tableToString(circle))
+  Plot.addCircle(circle, "Welzl", "blue")
+
+  circle = EnclosingCircle.smolik(rand_points)
+  print("Smolik:    " .. Utils.tableToString(circle))
+  Plot.addCircle(circle, "Smolik", "brown")
+
+  -- circle = EnclosingCircle.bruteForce(rand_points)
+  -- print("Brute Force: " .. Utils.tableToString(circle))
+  -- Plot.addCircle(circle, "Brute Force", "blue")
+
+  Plot.plot()
+
+else
+  local circle = nil
+  if arg[1] == "dumb" then
+    circle = EnclosingCircle.dumb(rand_points)
+    Plot.init{title = "Dumb Enclosing Circle"}
+
+  elseif arg[1] == "heuristic" then
+    circle = EnclosingCircle.heuristic(rand_points)
+    Plot.init{title = "Heuristic Enclosing Circle"}
+
+  elseif arg[1] == "bruteforce" then
+    circle = EnclosingCircle.bruteForce(rand_points)
+    Plot.init{title = "Brute Force Enclosing Circle"}
+
+  elseif arg[1] == "welzl" then
+    circle = EnclosingCircle.welzl(rand_points)
+    Plot.init{title = "Welzl's Enclosing Circle"}
+
+  elseif arg[1] == "smolik" then
+    circle = EnclosingCircle.smolik(rand_points)
+    Plot.init{title = "Smolik's Enclosing Circle"}
   end
+
+  print("Found circle: " .. Utils.tableToString(circle))
+  print("Is this a valid result? " .. tostring(EnclosingCircle.validateCircle(circle, rand_points)))
+  Plot.addPointList(rand_points)
+  Plot.addCircle(circle)
+  Plot.plot()
 end
-
-circle = {x = 0, y = 0, r = 100}
-Utils.printTable(circle, "Circle")
-points = generateRandomPointsInCircle(40, circle.x, circle.y, circle.r)
-addPoints(points)
-print(EnclosingCircle.validateCircle(circle, points))
-
-circle = EnclosingCircle.dumb(points)
-Plot.addCircle(circle.x, circle.y, circle.r, "Dumb", "red")
-Utils.printTable(circle, "Dumb")
-print(EnclosingCircle.validateCircle(circle, points))
-
-circle = EnclosingCircle.heuristic(points)
-Plot.addCircle(circle.x, circle.y, circle.r, "Heuristic", "blue")
-Utils.printTable(circle, "Heuristic")
-print(EnclosingCircle.validateCircle(circle, points))
-
--- circle = EnclosingCircle.bruteForce(points)
--- Plot.addCircle(circle.x, circle.y, circle.r, "Brute Force", "yellow")
--- Utils.printTable(circle, "Brute Force")
--- print(EnclosingCircle.validateCircle(circle, points))
-
-circle, boundary = EnclosingCircle.welzl(points)
-Plot.addCircle(circle.x, circle.y, circle.r, "Welzl", "green")
-Utils.printTable(circle, "Welzl")
-print(EnclosingCircle.validateCircle(circle, points))
-
-Plot.plot()

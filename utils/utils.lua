@@ -31,6 +31,23 @@ function Utils.printTable(t, name, indent)
   end
 end
 
+function Utils.tableToString(t)
+  local str = '{ '
+  for k, v in pairs(t) do
+    str = str .. k .. '= ' .. v .. ', '
+  end
+  return str .. '}'
+end
+
+-- shuffle a numeric table in O(n)
+function Utils.shuffle(list)
+  local n = #list
+  for i = n, 2, -1 do
+      local j = math.random(i)
+      list[i], list[j] = list[j], list[i]
+  end
+end
+
 -- measure the execution time of a function
 function Utils.measureExecutionTime(func, ...)
   local start_time = os.clock()
