@@ -11,7 +11,10 @@ end
 
 ------- PUBLIC METHODS -------
 
--- Jarvis's march or the gift wrapping algoritm. It should run in O(nlogn).
+-- Time Complexity: O(nh), where "h" is the number of vertices on the convex hull.
+-- Proposed by R.A. Jarvis in 1973.
+-- Description: Jarvis March, or the Gift Wrapping algorithm, iteratively selects
+-- the point with the smallest polar angle as the next vertex of the convex hull.
 function ConvexHull.jarvisMarch(points)
   local n = #points
 
@@ -50,8 +53,10 @@ function ConvexHull.jarvisMarch(points)
   return hull
 end
 
--- From the paper "Efficient Algorithms for Convex Hulls of Simple Polygons"
--- by Petr Skala (2016). It should run in O(n) (average)
+-- Time Complexity: O(n)
+-- Proposed by Skala in 2016 ("Efficient Algorithms for Convex Hulls of Simple Polygons")
+-- Description: It is based on a sweep-line technique and is designed to have a time
+-- complexity of O(n) in practice for many datasets.
 function ConvexHull.skala(points)
   local n = #points
   if n <= 2 then

@@ -1,7 +1,6 @@
 #!/usr/bin/lua
 
 package.path = package.path .. ";../?/?.lua"
-
 local ConvexHull = require("convex_hull")
 local Plot = require("matplotlua")
 local Utils = require("utils")
