@@ -113,8 +113,15 @@ end
 -- heuristic method to find any enclosing circle in O(n)
 -- the returned circle is not necessarily the smallest, but a good approximation
 function EnclosingCircle.heuristic(points)
-  local minXIndex, maxXIndex = _findMinMaxIndexes(points)
-  local circle = _makeCircle({points[minXIndex], points[maxXIndex]})
+  local minXid, maxXid, minYid, maxYid = _findMinMaxIndexes(points)
+  local distX = _eucl_distance(points[minXid], points[maxXid])
+  local distY = _eucl_distance(points[minYid], points[maxYid])
+  local circle
+  if distY > distX then
+    circle = _makeCircle({points[minYid], points[maxYid]})
+  else
+    circle = _makeCircle({points[minXid], points[maxXid]})
+  end
 
   for _, point in ipairs(points) do
     local distance = _eucl_distance(circle, point)
