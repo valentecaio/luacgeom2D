@@ -1,11 +1,13 @@
 #!/usr/bin/lua
 
-package.path = package.path .. ";../?/?.lua"
+package.path = package.path .. ";../?/?.lua" -- necessary to launch the script from the enclosing folder
+package.path = package.path .. ";./?/?.lua"  -- necessary to launch the script from the root folder
 local Plot = require("matplotlua")
 local Utils = require("utils")
 local EnclosingCircle = require("enclosing_circle")
 local ConvexHull = require("convex_hull")
 
+-- validate args
 local cmds = {"complexity", "compare", "dumb", "heuristic", "bruteforce", "welzl", "smolik"}
 local cmds_str = table.concat(cmds, "|")
 if (not arg[1]) or (not string.find(cmds_str, arg[1])) then
@@ -14,17 +16,10 @@ if (not arg[1]) or (not string.find(cmds_str, arg[1])) then
 end
 
 local base_circle = {x = 0, y = 0, r = 100}
-local rand_points = Utils.generateRandomPointsInCircle(100, base_circle)
+local N = 41
+local rand_points = Utils.generateRandomPointsInCircle(N, base_circle)
 
 if arg[1] == "complexity" then
-  -- init data to be plotted
-  local sizes = {}
-  local dumbTimes = {}
-  local heuristicTimes = {}
-  local bruteforceTimes = {}
-  local welzlTimes = {}
-  local smolikTimes = {}
-
   -- parameters for the analysis
   local min = 100
   local max = 1000
@@ -33,6 +28,14 @@ if arg[1] == "complexity" then
   -- used to print progress
   local totalIterations = (max - min) / step + 1
   local count = -1
+
+  -- init data to be plotted
+  local sizes = {}
+  local dumbTimes = {}
+  local heuristicTimes = {}
+  local bruteforceTimes = {}
+  local welzlTimes = {}
+  local smolikTimes = {}
 
   for size = min, max, step do
     local points = Utils.generateRandomPointsInCircle(size, base_circle)
