@@ -51,13 +51,16 @@ end
 -- measure the execution time of a function
 function Utils.measureExecutionTime(func, ...)
   local start_time = os.clock()
-  func(...)
+  ret = func(...)
   local end_time = os.clock()
-  return end_time - start_time
+  return end_time - start_time, ret
 end
 
 -- generate N random points contained in a given circle
 function Utils.generateRandomPointsInCircle(N, circle)
+  -- we need a random seed to avoid generating the same points every time
+  math.randomseed(os.clock()*100000000000)
+
   local points = {}
   for i = 1, N do
     local angle = math.random() * 2 * math.pi

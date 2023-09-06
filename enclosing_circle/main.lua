@@ -7,22 +7,28 @@ local Utils = require("utils")
 local EnclosingCircle = require("enclosing_circle")
 local ConvexHull = require("convex_hull")
 
--- validate args
 local cmds = {"complexity", "compare", "dumb", "heuristic", "bruteforce", "welzl", "smolik"}
 local cmds_str = table.concat(cmds, "|")
-if (not arg[1]) or (not string.find(cmds_str, arg[1])) then
-  print("Usage: lua main.lua [" .. cmds_str .. "]")
-  return
+local function print_help_and_quit()
+  print("Usage: lua main.lua <method> [N]\
+  where N is the number of random points in the dataset (optional, default: 100)\
+  and <method> is one of [complexity|compare|dumb|heuristic|bruteforce|welzl|smolik]")
+  os.exit()
 end
 
+-- validate args
+if (not arg[1]) or (not string.find(cmds_str, arg[1])) then
+  print_help_and_quit()
+end
+
+local N = arg[2] or 100
 local base_circle = {x = 0, y = 0, r = 100}
-local N = 41
 local rand_points = Utils.generateRandomPointsInCircle(N, base_circle)
 
 if arg[1] == "complexity" then
   -- parameters for the analysis
   local min = 100
-  local max = 1000
+  local max = 7000
   local step = 10
 
   -- used to print progress
@@ -67,56 +73,52 @@ if arg[1] == "complexity" then
   Plot.plot()
 
 elseif arg[1] == "compare" then
-  Plot.init{title = "Enclosing Circle Comparison", xlabel = "x", ylabel = "y"}
+  Plot.init{title = "Enclosing Circle Comparison (N = " .. N .. ")", xlabel = "x", ylabel = "y"}
   Plot.addPointList(rand_points)
 
-  local circle = EnclosingCircle.dumb(rand_points)
-  print("Dumb:      " .. Utils.tableToString(circle))
+  local time, circle = Utils.measureExecutionTime(EnclosingCircle.dumb, rand_points)
+  print("Dumb:      " .. Utils.tableToString(circle), " in " .. time .. " seconds")
   Plot.addCircle(circle, "Dumb", "red")
 
-  circle = EnclosingCircle.heuristic(rand_points)
-  print("Heuristic: " .. Utils.tableToString(circle))
+  time, circle = Utils.measureExecutionTime(EnclosingCircle.heuristic, rand_points)
+  print("Heuristic: " .. Utils.tableToString(circle), " in " .. time .. " seconds")
   Plot.addCircle(circle, "Heuristic", "green")
 
-  circle = EnclosingCircle.welzl(rand_points)
-  print("Welzl:     " .. Utils.tableToString(circle))
+  time, circle = Utils.measureExecutionTime(EnclosingCircle.welzl, rand_points)
+  print("Welzl:     " .. Utils.tableToString(circle), " in " .. time .. " seconds")
   Plot.addCircle(circle, "Welzl", "blue")
 
-  circle = EnclosingCircle.smolik(rand_points)
-  print("Smolik:    " .. Utils.tableToString(circle))
+  time, circle = Utils.measureExecutionTime(EnclosingCircle.smolik, rand_points)
+  print("Smolik:    " .. Utils.tableToString(circle), " in " .. time .. " seconds")
   Plot.addCircle(circle, "Smolik", "brown")
 
-  -- circle = EnclosingCircle.bruteForce(rand_points)
-  -- print("Brute Force: " .. Utils.tableToString(circle))
+  -- time, circle = Utils.measureExecutionTime(EnclosingCircle.bruteForce, rand_points)
+  -- print("Brute Force: " .. Utils.tableToString(circle) .. "in " .. time .. " seconds")
   -- Plot.addCircle(circle, "Brute Force", "blue")
 
   Plot.plot()
 
 else
-  local circle = nil
+  local method
   if arg[1] == "dumb" then
-    circle = EnclosingCircle.dumb(rand_points)
-    Plot.init{title = "Dumb Enclosing Circle"}
-
+    method = EnclosingCircle.dumb
   elseif arg[1] == "heuristic" then
-    circle = EnclosingCircle.heuristic(rand_points)
-    Plot.init{title = "Heuristic Enclosing Circle"}
-
+    method = EnclosingCircle.heuristic
   elseif arg[1] == "bruteforce" then
-    circle = EnclosingCircle.bruteForce(rand_points)
-    Plot.init{title = "Brute Force Enclosing Circle"}
-
+    method = EnclosingCircle.bruteForce
   elseif arg[1] == "welzl" then
-    circle = EnclosingCircle.welzl(rand_points)
-    Plot.init{title = "Welzl's Enclosing Circle"}
-
+    method = EnclosingCircle.welzl
   elseif arg[1] == "smolik" then
-    circle = EnclosingCircle.smolik(rand_points)
-    Plot.init{title = "Smolik's Enclosing Circle"}
+    method = EnclosingCircle.smolik
+  else
+    print_help_and_quit()
   end
 
+  local time, circle = Utils.measureExecutionTime(method, rand_points)
   print("Found circle: " .. Utils.tableToString(circle))
+  print("Execution time: " .. time .. " seconds")
   print("Is this a valid result? " .. tostring(EnclosingCircle.validateCircle(circle, rand_points)))
+  Plot.init{title = "Enclosing Circle (method: " .. arg[1] .. ", N: " .. N .. ")"}
   Plot.addPointList(rand_points)
   Plot.addCircle(circle)
   Plot.plot()
