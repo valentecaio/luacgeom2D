@@ -10,7 +10,7 @@ local ConvexHull = require("convex_hull")
 local cmds = {"complexity", "compare", "dumb", "heuristic", "bruteforce", "welzl", "smolik"}
 local cmds_str = table.concat(cmds, "|")
 local function print_help_and_quit()
-  print("Usage: lua main.lua <method> [N]\
+  print("Usage: lua " .. arg[0] .. " <method> [N]\
   where N is the number of random points in the dataset (optional, default: 100)\
   and <method> is one of [complexity|compare|dumb|heuristic|bruteforce|welzl|smolik]")
   os.exit()
