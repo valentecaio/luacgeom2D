@@ -47,13 +47,12 @@ if method_name == "complexity" then
   Plot.addCurve(sizes, skalaTimes, "Skala", "green")
   Plot.plot()
 
-elseif method_name == "compare" then
-  local points = Utils.generateRandomPointsInCircle(100, {x=0, y=0, r=100})
-  local jarvisHull = ConvexHull.jarvisMarch(points)
-  local skalaHull = ConvexHull.skala(points)
+elseif method_name == "compare" and dataset then
+  local jarvisHull = ConvexHull.jarvisMarch(dataset)
+  local skalaHull = ConvexHull.skala(dataset)
 
   Plot.init({title = "Convex Hull comparison", xlabel = "x", ylabel = "y"})
-  Plot.addPointList(points)
+  Plot.addPointList(dataset)
   Plot.addPolygon(jarvisHull, "Jarvis March", "red")
   Plot.addPolygon(skalaHull, "Skala", "green")
   Plot.plot()
@@ -77,6 +76,7 @@ elseif dataset then
   Plot.init{title = "Convex Hull (method: " .. method_name .. ", dataset: " .. arg[2] .. ")"}
   Plot.addPointList(dataset)
   Plot.addPolygon(hull, method_name, "green")
+  -- Plot.figure("figures/test")
   Plot.plot()
 
 else

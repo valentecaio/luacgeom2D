@@ -53,10 +53,10 @@ function ConvexHull.jarvisMarch(points)
   return hull
 end
 
--- Time Complexity: O(n+k)
+-- Time Complexity: O(n+h)
 -- Proposed by Skala in 2016 ("Efficient Algorithms for Convex Hulls of Simple Polygons")
 -- Description: It is based on a sweep-line technique and is designed to have a time
--- complexity of O(n+k) in practice for many datasets.
+-- complexity of O(n) in practice for many datasets.
 function ConvexHull.skala(points)
   local n = #points
   if n <= 2 then
