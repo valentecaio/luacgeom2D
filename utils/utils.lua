@@ -72,4 +72,14 @@ function Utils.generateRandomPointsInCircle(N, circle)
   return points
 end
 
+function Utils.readPointsFromString(str)
+  local points = {}
+  for x, y in str:gmatch("(%d+)%s+(%d+)") do
+    if x and y then
+      table.insert(points, {x = tonumber(x), y = tonumber(y)})
+    end
+  end
+  return points
+end
+
 return Utils
