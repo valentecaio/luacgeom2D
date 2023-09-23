@@ -36,7 +36,11 @@ def plot_from_json(json_data):
     plt.xlabel(json_data['xlabel'] if 'xlabel' in json_data else 'X')
     plt.ylabel(json_data['ylabel'] if 'ylabel' in json_data else 'Y')
     plt.title(json_data['title'] if 'title' in json_data else 'MatPlotLua')
-    plt.show()
+
+    if 'figure' in json_data:
+        plt.savefig(json_data["figure"])
+    else:
+        plt.show()
 
 if __name__ == '__main__':
     if len(sys.argv) == 2:

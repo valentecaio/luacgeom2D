@@ -12,7 +12,7 @@ local cmds_str = table.concat(cmds, "|")
 local function print_help_and_quit()
   print("Usage: lua " .. arg[0] .. " <method> [N]\
   where N is the number of random points in the dataset (optional, default: 100)\
-  and <method> is one of [complexity|compare|dumb|heuristic|bruteforce|welzl|smolik]")
+  and <method> is one of [" .. cmds_str .. "]")
   os.exit()
 end
 

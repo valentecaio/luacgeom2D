@@ -82,7 +82,7 @@ function Plot.addPolygon(points, label, color)
 end
 
 -- dump plot data to a file with default or specified name
-function Plot.saveToFile(filename)
+function Plot.dumpStateToFile(filename)
   filename = filename or Plot.JSON_NAME
   local json_data = cjson.encode(Plot.state)
   local file = io.open(filename, "w")
@@ -93,7 +93,7 @@ end
 function Plot.plot(use_file)
   if use_file then
     -- write to a file and call Python script with file
-    Plot.saveToFile()
+    Plot.dumpStateToFile()
     local command = 'python "' .. Plot.SCRIPT_PATH .. '" ' .. Plot.JSON_NAME
     os.execute(command)
   else
@@ -103,6 +103,12 @@ function Plot.plot(use_file)
     pipe:write(json_data)
     pipe:close()
   end
+end
+
+-- save plot to an image file
+function Plot.figure(filename)
+  Plot.state.figure = filename
+  Plot.plot()
 end
 
 -- init Plot.state
