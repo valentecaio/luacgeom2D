@@ -97,40 +97,49 @@ end
 function ConvexHull.skala(points)
   local n = #points
   if n <= 2 then
-      -- No need to compute the convex hull for less than 3 points
-      return points
+    -- No need to compute the convex hull for less than 3 points
+    return points
   end
 
   -- Sort the points lexicographically (first by x, then by y)
   table.sort(points, function(p1, p2)
-      if p1.x == p2.x then
-          return p1.y < p2.y
-      end
-      return p1.x < p2.x
+    if p1.x == p2.x then
+      return p1.y < p2.y
+    end
+    return p1.x < p2.x
   end)
 
   -- Initialize the upper and lower hulls
   local upperHull = {}
   local lowerHull = {}
 
+  -- for plotting figures
+  local steps = {}
+
   -- Compute the upper hull
   for i = 1, n do
-      while #upperHull >= 2 and
-          ((upperHull[#upperHull].x - upperHull[#upperHull - 1].x) * (points[i].y - upperHull[#upperHull].y) -
-           (upperHull[#upperHull].y - upperHull[#upperHull - 1].y) * (points[i].x - upperHull[#upperHull].x)) <= 0 do
-          table.remove(upperHull)
-      end
-      table.insert(upperHull, points[i])
+    while #upperHull >= 2 and
+      ((upperHull[#upperHull].x - upperHull[#upperHull - 1].x) * (points[i].y - upperHull[#upperHull].y) -
+        (upperHull[#upperHull].y - upperHull[#upperHull - 1].y) * (points[i].x - upperHull[#upperHull].x)) <= 0 do
+      table.remove(upperHull)
+    end
+    table.insert(upperHull, points[i])
+    if ConvexHull.gif then
+      table.insert(steps, Utils.deepcopy(upperHull))
+    end
   end
 
   -- Compute the lower hull
   for i = n, 1, -1 do
-      while #lowerHull >= 2 and
-          ((lowerHull[#lowerHull].x - lowerHull[#lowerHull - 1].x) * (points[i].y - lowerHull[#lowerHull].y) -
-           (lowerHull[#lowerHull].y - lowerHull[#lowerHull - 1].y) * (points[i].x - lowerHull[#lowerHull].x)) <= 0 do
-          table.remove(lowerHull)
-      end
-      table.insert(lowerHull, points[i])
+    while #lowerHull >= 2 and
+      ((lowerHull[#lowerHull].x - lowerHull[#lowerHull - 1].x) * (points[i].y - lowerHull[#lowerHull].y) -
+        (lowerHull[#lowerHull].y - lowerHull[#lowerHull - 1].y) * (points[i].x - lowerHull[#lowerHull].x)) <= 0 do
+      table.remove(lowerHull)
+    end
+    table.insert(lowerHull, points[i])
+    if ConvexHull.gif then
+      table.insert(steps, Utils.deepcopy(lowerHull))
+    end
   end
 
   -- Remove duplicate points at the start and end of the lower hull
@@ -139,9 +148,15 @@ function ConvexHull.skala(points)
 
   -- Combine the upper and lower hulls to form the convex hull
   for i = 1, #lowerHull do
-      table.insert(upperHull, lowerHull[i])
+    table.insert(upperHull, lowerHull[i])
+    if ConvexHull.gif then
+      table.insert(steps, Utils.deepcopy(upperHull))
+    end
   end
 
+  if ConvexHull.gif then
+    _plotHulls("Skala Convex Hull", points, steps)
+  end
   return upperHull
 end
 

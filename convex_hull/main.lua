@@ -16,8 +16,8 @@ local parser = argparse(arg[0], "Commands:\
 parser:argument("command",   "One of the commands above.")
 parser:option("-a --alg",    "Algorithm name, one of [ jarvis | graham | skala ]")
 parser:option("-d --dir",    "Output directory for figures.", "figures/")
-parser:option("-i --input",  "Data Set input file path.")
-parser:option("-l --length", "Length of the random dataset.", "100")
+parser:option("-i --input",  "Data Set input file path. Omit this option to use a random dataset.")
+parser:option("-n --npoints","Number of points in the random dataset.", "100")
 parser:option("-t --delay",  "Delay of gif image transition in ms.", "50")
 local args = parser:parse()
 
@@ -25,8 +25,8 @@ if args.input then
   local dataset = assert(io.open(args.input, "r")):read("*all")
   points = Utils.readPointsFromString(dataset)
 else
-  args.input = args.length .. " random points"
-  points = Utils.generateRandomPointsInCircle(args.length, {x=0, y=0, r=100})
+  args.input = args.npoints .. " random points"
+  points = Utils.generateRandomPointsInCircle(args.npoints, {x=0, y=0, r=100})
 end
 
 local method_by_name = {
@@ -84,6 +84,7 @@ elseif args.command == "gif" then
   local method = method_by_name[args.alg]
   assert(method)
 
+  -- clear figures dir
   os.execute("rm " .. args.dir .. "*.png")
 
   ConvexHull.gif = true
