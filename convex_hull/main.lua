@@ -2,32 +2,40 @@
 
 package.path = package.path .. ";./?/?.lua"
 package.path = package.path .. ";../?/?.lua"
+
 local Plot = require("matplotlua")
 local Utils = require("utils")
 local ConvexHull = require("convex_hull")
+local argparse = require("argparse")
 
+local parser = argparse(arg[0], "Commands:\
+  algorithm    Generate and plot the convex hull for a given algorithm.\
+  compare      Run all algorithms and plot their convex hulls.\
+  complexity   Plot the execution time of the algorithms for different input sizes.\
+  gif          Generate step-by-step gif image for a given algorithm.")
+parser:argument("command",   "One of the commands above.")
+parser:option("-a --alg",    "Algorithm name, one of [ jarvis | graham | skala ]")
+parser:option("-d --dir",    "Output directory for figures.", "figures/")
+parser:option("-i --input",  "Data Set input file path.")
+parser:option("-l --length", "Length of the random dataset.", "100")
+parser:option("-t --delay",  "Delay of gif image transition in ms.", "50")
+local args = parser:parse()
 
-local cmds = {"complexity", "compare", "jarvis", "graham", "skala"}
-local cmds_str = table.concat(cmds, "|")
-local function print_help_and_quit()
-  print("Usage: lua " .. arg[0] .. " <method> [dataset]\
-  where <method> is one of [" .. cmds_str .. "]\
-  and [dataset] is a file containing points in the format of cloud1.txt")
-  os.exit()
+if args.input then
+  local dataset = assert(io.open(args.input, "r")):read("*all")
+  points = Utils.readPointsFromString(dataset)
+else
+  args.input = args.length .. " random points"
+  points = Utils.generateRandomPointsInCircle(args.length, {x=0, y=0, r=100})
 end
 
--- validate args
-if (#arg < 1) or (not string.find(cmds_str, arg[1])) then
-  print_help_and_quit()
-end
+local method_by_name = {
+  jarvis = ConvexHull.jarvisMarch,
+  graham = ConvexHull.graham,
+  skala = ConvexHull.skala
+}
 
-method_name = arg[1]
-if arg[2] then
-  local dataset_str = assert(io.open(arg[2], "r")):read("*all")
-  dataset = Utils.readPointsFromString(dataset_str)
-end
-
-if method_name == "complexity" then
+if args.command == "complexity" then
   local sizes = {}
   local jarvisMarchTimes = {}
   local skalaTimes = {}
@@ -47,38 +55,42 @@ if method_name == "complexity" then
   Plot.addCurve(sizes, skalaTimes, "Skala", "green")
   Plot.plot()
 
-elseif method_name == "compare" and dataset then
-  local jarvisHull = ConvexHull.jarvisMarch(dataset)
-  local skalaHull = ConvexHull.skala(dataset)
+
+elseif args.command == "compare" then
+  local jarvisHull = ConvexHull.jarvisMarch(points)
+  local skalaHull = ConvexHull.skala(points)
 
   Plot.init({title = "Convex Hull comparison", xlabel = "x", ylabel = "y"})
-  Plot.addPointList(dataset)
+  Plot.addPointList(points)
   Plot.addPolygon(jarvisHull, "Jarvis March", "red")
   Plot.addPolygon(skalaHull, "Skala", "green")
   Plot.plot()
 
-elseif dataset then
-  local method
-  if method_name == "jarvis" then
-    method = ConvexHull.jarvisMarch
-  elseif method_name == "graham" then
-    method = ConvexHull.graham
-  elseif method_name == "skala" then
-    method = ConvexHull.skala
-  else
-    print_help_and_quit()
-  end
 
-  local time, hull = Utils.measureExecutionTime(method, dataset)
-  -- print("Found hull: " .. Utils.tableToString(hull))
+elseif args.command == "algorithm" then
+  local method = method_by_name[args.alg]
+  assert(method)
+
+  local time, hull = Utils.measureExecutionTime(method, points)
   print("Execution time: " .. time .. " seconds")
-  -- print("Is this a valid result? " .. tostring(ConvexHull.validateHull(hull, dataset)))
-  Plot.init{title = "Convex Hull (method: " .. method_name .. ", dataset: " .. arg[2] .. ")"}
-  Plot.addPointList(dataset)
-  Plot.addPolygon(hull, method_name, "green")
-  -- Plot.figure("figures/test")
+  Plot.init{title = "Convex Hull (method: " .. args.alg .. ", dataset: " .. args.input .. ")"}
+  Plot.addPointList(points)
+  Plot.addPolygon(hull, args.alg, "green")
   Plot.plot()
 
-else
-  print_help_and_quit()
+
+elseif args.command == "gif" then
+  print("Generating gif for " .. args.alg .. " algorithm ...")
+  local method = method_by_name[args.alg]
+  assert(method)
+
+  os.execute("rm " .. args.dir .. "*.png")
+
+  ConvexHull.gif = true
+  ConvexHull.dir = args.dir
+
+  method(points)
+
+  local filename = Plot.generateGif(args.dir, args.delay)
+  print("Gif generated at " .. filename)
 end

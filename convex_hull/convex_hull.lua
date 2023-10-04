@@ -1,15 +1,39 @@
+local Plot = require("matplotlua")
+local Utils = require("utils")
+
 local ConvexHull = {}
 
+ConvexHull.gif = false      -- set to true before calling a method to generate figures
+ConvexHull.dir = "figures/" -- directory to save figures to
 
-------- PRIVATE METHODS -------
+
+------- PRIVATE -------
 
 -- calculate the cross product of vectors (p1p2) and (p1p3)
 local function _crossProduct(p1, p2, p3)
   return (p2.x - p1.x) * (p3.y - p1.y) - (p2.y - p1.y) * (p3.x - p1.x)
 end
 
+local function _plotHull(title, points, hull, i)
+  Plot.clear()
+  Plot.init{title = title .. " (t = " .. i .. ")"}
+  Plot.addPointList(points)
+  Plot.addPolygon(hull, "Convex Hull", "green")
+  Plot.figure(ConvexHull.dir .. i .. ".png")
+end
 
-------- PUBLIC METHODS -------
+local function _plotHulls(title, points, hulls)
+  _plotHull(title, points, hulls[1], 0, dir)
+  for i = 1, #hulls do
+    _plotHull(title, points, hulls[i], i, dir)
+  end
+  _plotHull(title, points, hulls[#hulls], #hulls+1, dir)
+  _plotHull(title, points, hulls[#hulls], #hulls+2, dir)
+  _plotHull(title, points, hulls[#hulls], #hulls+3, dir)
+end
+
+
+------- PUBLIC -------
 
 -- Time Complexity: O(nh), where "h" is the number of vertices on the convex hull.
 -- Proposed by R.A. Jarvis in 1973.
@@ -43,12 +67,25 @@ function ConvexHull.jarvisMarch(points)
   -- initialize the convex hull with minYPoint and the first two sorted points
   local hull = {minYPoint, points[1], points[2]}
 
+  -- for plotting figures
+  local steps = {}
+  if ConvexHull.gif then
+    steps = {Utils.deepcopy(hull)}
+  end
+
   -- build the convex hull
   for i = 3, n do
     while #hull >= 2 and _crossProduct(hull[#hull - 1], hull[#hull], points[i]) <= 0 do
       table.remove(hull)
     end
     table.insert(hull, points[i])
+    if ConvexHull.gif then
+      table.insert(steps, Utils.deepcopy(hull))
+    end
+  end
+
+  if ConvexHull.gif then
+    _plotHulls("Jarvis Gift Wrapping Convex Hull", points, steps)
   end
   return hull
 end

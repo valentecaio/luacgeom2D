@@ -111,6 +111,15 @@ function Plot.figure(filename)
   Plot.plot()
 end
 
+-- generate a GIF animation from a directory of PNG files
+function Plot.generateGif(dir, delay)
+  local timestamp = os.date("%Y-%m-%d-%H-%M-%S")
+  local filename = dir .. "plot-" .. timestamp .. ".gif"
+  os.execute("convert -delay " .. delay .. " -loop 0 $(ls -v " .. dir .. "/*.png) " .. filename)
+  -- convert -delay 50 -loop 0 $(ls -v *.png) animation.gif
+  return filename
+end
+
 -- init Plot.state
 Plot.clear()
 
