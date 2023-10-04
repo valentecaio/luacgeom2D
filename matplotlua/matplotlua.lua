@@ -12,6 +12,17 @@ local lib_dir = debug.getinfo(1, 'S').source:match[[^@?(.*[\/])[^\/]-$]]
 Plot.SCRIPT_PATH = lib_dir .. "matplotlua.py"
 Plot.JSON_NAME = "matplotlua.json"
 
+-- History of plot states, used to generate Gif animations
+-- To generate a GIF, setup a Plot state for each frame of the animation
+-- and call Plot.saveState() to save it.
+-- In the end, call Plot.generateGif() to plot all frames and
+-- concatenate them in a GIF file.
+Plot.state_history = {}
+function Plot.saveState()
+  table.insert(Plot.state_history, Plot.state)
+end
+
+-- clear plot data
 function Plot.clear()
   Plot.state = {
     points = {},
@@ -25,7 +36,7 @@ end
 -- usage example: Plot.init{title = "Plot", xlabel = "x", ylabel = "y"}
 function Plot.init(data)
   Plot.clear()
-  for k,v in pairs(data) do Plot.state[k] = v end
+  for k,v in pairs(data or {}) do Plot.state[k] = v end
 end
 
 -- points is a list of tables with x and y coordinates
@@ -111,11 +122,26 @@ function Plot.figure(filename)
   Plot.plot()
 end
 
--- generate a GIF animation from a directory of PNG files
-function Plot.generateGif(dir, delay)
-  local timestamp = os.date("%Y-%m-%d-%H-%M-%S")
-  local filename = dir .. "plot-" .. timestamp .. ".gif"
-  os.execute("convert -delay " .. delay .. " -loop 0 $(ls -v " .. dir .. "/*.png) " .. filename)
+-- plot step-by-step figures of the state history
+-- generate a GIF animation in the end
+function Plot.generateGif(title, dir, delay)
+  -- clear figures dir
+  os.execute("rm " .. dir .. "*.png")
+
+  -- generate new figures
+  Plot.saveState()
+  for i,state in ipairs(Plot.state_history) do
+    Plot.state = state
+    Plot.state.title = title .. " (t = " .. i .. ")"
+    Plot.figure(dir .. i .. ".png")
+  end
+  for i = 1, 3 do
+    Plot.figure(dir .. #Plot.state_history + i .. ".png")
+  end
+
+  -- generate GIF from figures
+  local filename = dir .. "plot-" .. os.date("%Y-%m-%d-%H-%M-%S") .. ".gif"
+  os.execute("convert -delay " .. delay .. " -loop 0 $(ls -v " .. dir .. "*.png) " .. filename)
   -- convert -delay 50 -loop 0 $(ls -v *.png) animation.gif
   return filename
 end

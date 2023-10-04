@@ -31,7 +31,7 @@ end
 
 local method_by_name = {
   jarvis = ConvexHull.jarvisMarch,
-  graham = ConvexHull.graham,
+  graham = ConvexHull.graham, -- TODO
   skala = ConvexHull.skala
 }
 
@@ -84,14 +84,16 @@ elseif args.command == "gif" then
   local method = method_by_name[args.alg]
   assert(method)
 
-  -- clear figures dir
-  os.execute("rm " .. args.dir .. "*.png")
-
   ConvexHull.gif = true
-  ConvexHull.dir = args.dir
-
   method(points)
 
-  local filename = Plot.generateGif(args.dir, args.delay)
-  print("Gif generated at " .. filename)
+  local filename = Plot.generateGif(
+    "Convex Hull (" .. args.alg .. ")",
+    args.dir,
+    args.delay
+  )
+  print("Gif saved at " .. filename)
+
+  -- try to open gif in firefox
+  -- os.execute("firefox --new-window " .. filename)
 end

@@ -1,35 +1,49 @@
 local Plot = require("matplotlua")
 local Utils = require("utils")
 
-local ConvexHull = {}
-
-ConvexHull.gif = false      -- set to true before calling a method to generate figures
-ConvexHull.dir = "figures/" -- directory to save figures to
-
+local ConvexHull = {
+  gif = false,      -- set to true before calling a method to generate figures
+  hull = {},        -- convex hull points
+  points = {},      -- input points
+}
 
 ------- PRIVATE -------
 
--- calculate the cross product of vectors (p1p2) and (p1p3)
-local function _crossProduct(p1, p2, p3)
-  return (p2.x - p1.x) * (p3.y - p1.y) - (p2.y - p1.y) * (p3.x - p1.x)
-end
-
-local function _plotHull(title, points, hull, i)
+local function _setup_plot()
   Plot.clear()
-  Plot.init{title = title .. " (t = " .. i .. ")"}
-  Plot.addPointList(points)
-  Plot.addPolygon(hull, "Convex Hull", "green")
-  Plot.figure(ConvexHull.dir .. i .. ".png")
+  Plot.addPointList(ConvexHull.points)
+  Plot.addPolygon(ConvexHull.hull, "Convex Hull", "green")
+  Plot.saveState()
 end
 
-local function _plotHulls(title, points, hulls)
-  _plotHull(title, points, hulls[1], 0, dir)
-  for i = 1, #hulls do
-    _plotHull(title, points, hulls[i], i, dir)
+-- initialize the convex hull with the given points
+local function _hull_init(hull)
+  ConvexHull.hull = hull
+  if ConvexHull.gif then
+    _setup_plot()
   end
-  _plotHull(title, points, hulls[#hulls], #hulls+1, dir)
-  _plotHull(title, points, hulls[#hulls], #hulls+2, dir)
-  _plotHull(title, points, hulls[#hulls], #hulls+3, dir)
+  return ConvexHull.hull
+end
+
+-- append a point to the convex hull
+local function _hull_insert(point)
+  table.insert(ConvexHull.hull, point)
+  if ConvexHull.gif then
+    _setup_plot()
+  end
+end
+
+-- euclidean distance between two points
+local function _eucl_distance(p1, p2)
+  return math.sqrt((p1.x-p2.x)^2 + (p1.y-p2.y)^2)
+end
+
+-- calculate the cross product of vectors (p1p2) and (p1p3)
+-- returns > 0 if p1, p2, p3 are in counter-clockwise order
+-- returns < 0 if p1, p2, p3 are in clockwise order
+-- returns 0 when p1, p2, p3 are collinear
+local function _orient(p1, p2, p3)
+  return (p2.x - p1.x) * (p3.y - p1.y) - (p2.y - p1.y) * (p3.x - p1.x)
 end
 
 
@@ -40,53 +54,43 @@ end
 -- Description: Jarvis March, or the Gift Wrapping algorithm, iteratively selects
 -- the point with the smallest polar angle as the next vertex of the convex hull.
 function ConvexHull.jarvisMarch(points)
-  local n = #points
+  ConvexHull.points = points
 
-  -- if there are less than 3 points, they are all on the hull
-  if n <= 2 then
-    return points
+  -- if there are less than 3 points, they are the hull
+  if #points <= 2 then
+    return _hull_init(points)
   end
 
   -- find the point with the lowest y-coordinate (and leftmost if tied)
-  local minYPoint = points[1]
-  for i = 2, n do
-    if points[i].y < minYPoint.y or (points[i].y == minYPoint.y and points[i].x < minYPoint.x) then
-      minYPoint = points[i]
+  local pivot = points[1]
+  for i = 2, #points do
+    if points[i].y < pivot.y or (points[i].y == pivot.y and points[i].x < pivot.x) then
+      pivot = points[i]
     end
   end
 
   -- sort the points based on polar angle from minYPoint
   table.sort(points, function(p1, p2)
-    local cross = _crossProduct(minYPoint, p1, p2)
-    if cross == 0 then
-      return (p1.x - minYPoint.x)^2 + (p1.y - minYPoint.y)^2 < (p2.x - minYPoint.x)^2 + (p2.y - minYPoint.y)^2
+    local orient = _orient(pivot, p1, p2)
+    if orient == 0 then
+      -- if the points are collinear, the closest point to the pivot comes first
+      return _eucl_distance(pivot, p1) < _eucl_distance(pivot, p2)
     end
-    return cross > 0
+    return orient > 0
   end)
 
-  -- initialize the convex hull with minYPoint and the first two sorted points
-  local hull = {minYPoint, points[1], points[2]}
-
-  -- for plotting figures
-  local steps = {}
-  if ConvexHull.gif then
-    steps = {Utils.deepcopy(hull)}
-  end
+  -- initialize the convex hull with the pivot and the first two sorted points
+  local hull = _hull_init{pivot, points[1], points[2]}
 
   -- build the convex hull
-  for i = 3, n do
-    while #hull >= 2 and _crossProduct(hull[#hull - 1], hull[#hull], points[i]) <= 0 do
+  for i = 3, #points do
+    -- remove points that would create clockwise turns
+    while #hull >= 2 and _orient(hull[#hull-1], hull[#hull], points[i]) <= 0 do
       table.remove(hull)
     end
-    table.insert(hull, points[i])
-    if ConvexHull.gif then
-      table.insert(steps, Utils.deepcopy(hull))
-    end
+    _hull_insert(points[i])
   end
 
-  if ConvexHull.gif then
-    _plotHulls("Jarvis Gift Wrapping Convex Hull", points, steps)
-  end
   return hull
 end
 
@@ -95,9 +99,10 @@ end
 -- Description: It is based on a sweep-line technique and is designed to have a time
 -- complexity of O(n) in practice for many datasets.
 function ConvexHull.skala(points)
-  local n = #points
-  if n <= 2 then
-    -- No need to compute the convex hull for less than 3 points
+  ConvexHull.points = points
+
+  -- if there are less than 3 points, they are the hull
+  if #points <= 2 then
     return points
   end
 
@@ -117,10 +122,9 @@ function ConvexHull.skala(points)
   local steps = {}
 
   -- Compute the upper hull
-  for i = 1, n do
-    while #upperHull >= 2 and
-      ((upperHull[#upperHull].x - upperHull[#upperHull - 1].x) * (points[i].y - upperHull[#upperHull].y) -
-        (upperHull[#upperHull].y - upperHull[#upperHull - 1].y) * (points[i].x - upperHull[#upperHull].x)) <= 0 do
+  for i = 1, #points do
+    -- remove points that would create clockwise turns
+    while #upperHull >= 2 and _orient(upperHull[#upperHull-1], upperHull[#upperHull], points[i]) <= 0 do
       table.remove(upperHull)
     end
     table.insert(upperHull, points[i])
@@ -130,10 +134,9 @@ function ConvexHull.skala(points)
   end
 
   -- Compute the lower hull
-  for i = n, 1, -1 do
-    while #lowerHull >= 2 and
-      ((lowerHull[#lowerHull].x - lowerHull[#lowerHull - 1].x) * (points[i].y - lowerHull[#lowerHull].y) -
-        (lowerHull[#lowerHull].y - lowerHull[#lowerHull - 1].y) * (points[i].x - lowerHull[#lowerHull].x)) <= 0 do
+  for i = #points, 1, -1 do
+    -- remove points that would create clockwise turns
+    while(#lowerHull >= 2 and _orient(lowerHull[#lowerHull-1], lowerHull[#lowerHull], points[i]) <= 0) do
       table.remove(lowerHull)
     end
     table.insert(lowerHull, points[i])
@@ -155,7 +158,10 @@ function ConvexHull.skala(points)
   end
 
   if ConvexHull.gif then
-    _plotHulls("Skala Convex Hull", points, steps)
+    for _,hull in ipairs(steps) do
+      ConvexHull.hull = hull
+      _setup_plot()
+    end
   end
   return upperHull
 end
