@@ -14,11 +14,11 @@ Plot.JSON_NAME = "matplotlua.json"
 
 -- History of plot states, used to generate Gif animations
 -- To generate a GIF, setup a Plot state for each frame of the animation
--- and call Plot.saveState() to save it.
+-- and call Plot.saveFrame() to save it.
 -- In the end, call Plot.generateGif() to plot all frames and
 -- concatenate them in a GIF file.
 Plot.state_history = {}
-function Plot.saveState()
+function Plot.saveFrame()
   table.insert(Plot.state_history, Plot.state)
 end
 
@@ -129,12 +129,13 @@ function Plot.generateGif(title, dir, delay)
   os.execute("rm " .. dir .. "*.png")
 
   -- generate new figures
-  Plot.saveState()
+  Plot.saveFrame()
   for i,state in ipairs(Plot.state_history) do
     Plot.state = state
     Plot.state.title = title .. " (t = " .. i .. ")"
     Plot.figure(dir .. i .. ".png")
   end
+  -- create copies of last picture to hang on the last frame for a while
   for i = 1, 3 do
     Plot.figure(dir .. #Plot.state_history + i .. ".png")
   end

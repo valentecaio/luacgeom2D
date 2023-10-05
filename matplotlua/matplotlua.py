@@ -13,11 +13,11 @@ def plot_from_json(json_data):
     for obj in json_data['points']:
         label = obj.get('label') # default to None
         color = obj.get('color') # default to None
-        plt.plot(obj['x'], obj['y'], 'o', label=label)
+        plt.plot(obj['x'], obj['y'], 'o', color=color, label=label)
     for obj in json_data['curves']:
         label = obj.get('label')
         color = obj.get('color')
-        plt.plot(obj['x'], obj['y'], label=label)
+        plt.plot(obj['x'], obj['y'], color=color, label=label)
     for obj in json_data['polygons']:
         label = obj.get('label')
         color = obj.get('color')
