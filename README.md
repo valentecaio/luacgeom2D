@@ -7,4 +7,4 @@
 
 ## Install extra tools
     # We use ImageMagick to generate gif images  
-    $ sudo apt install imagemagick-6.q16
+    $ sudo apt install imagemagick-6.q16  

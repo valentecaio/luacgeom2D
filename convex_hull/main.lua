@@ -8,19 +8,27 @@ local Utils = require("utils")
 local ConvexHull = require("convex_hull")
 local argparse = require("argparse")
 
+local min_input_size = 10
+local max_input_size = 20000
+local step = 100
+
+-- parse args
 local parser = argparse(arg[0], "Commands:\
   algorithm    Generate and plot the convex hull for a given algorithm.\
-  compare      Run all algorithms and plot their convex hulls.\
+  compare      Visually compare the results of all algorithms runnig with the same dataset.\
   complexity   Plot the execution time of the algorithms for different input sizes.\
+  hull-size    Plot the size of the convex hull for different input sizes.\
   gif          Generate step-by-step gif image for a given algorithm.")
 parser:argument("command",   "One of the commands above.")
-parser:option("-a --alg",    "Algorithm name, one of [ jarvis | graham | skala ]")
-parser:option("-d --dir",    "Output directory for figures.", "figures/")
+parser:option("-a --alg",    "Algorithm name, one of [ jarvis | skala ]")
 parser:option("-i --input",  "Data Set input file path. Omit this option to use a random dataset.")
 parser:option("-n --npoints","Number of points in the random dataset.", "100")
-parser:option("-t --delay",  "Delay of gif image transition in ms.", "50")
+parser:option("-d --delay",  "Delay of gif image transition in ms.", "50")
+parser:option("--dir",       "Output directory for figures.", "figures/")
 local args = parser:parse()
 
+-- read dataset from file or generate random dataset
+local points = {}
 if args.input then
   local dataset = assert(io.open(args.input, "r")):read("*all")
   points = Utils.readPointsFromString(dataset)
@@ -30,17 +38,19 @@ else
 end
 
 local method_by_name = {
+  incremental = ConvexHull.incremental, -- TODO
   jarvis = ConvexHull.jarvisMarch,
   graham = ConvexHull.graham, -- TODO
   skala = ConvexHull.skala
 }
+
 
 if args.command == "complexity" then
   local sizes = {}
   local jarvisMarchTimes = {}
   local skalaTimes = {}
 
-  for size = 100, 50000, 200 do
+  for size = min_input_size, max_input_size, step do
     local points = Utils.generateRandomPointsInCircle(size, {x=0, y=0, r=100})
     local jarvisTime = Utils.measureExecutionTime(ConvexHull.jarvisMarch, points)
     local skalaTime = Utils.measureExecutionTime(ConvexHull.skala, points)
@@ -50,11 +60,29 @@ if args.command == "complexity" then
     table.insert(skalaTimes, skalaTime)
   end
 
-  Plot.init({title = "Convex Hull Execution Time", xlabel = "Number of points", ylabel = "Time (s)"})
+  Plot.init({title = "Convex Hull Execution Time (step: "..step..")", xlabel = "Number of points", ylabel = "Time (s)"})
   Plot.addCurve(sizes, jarvisMarchTimes, "Jarvis March", "red")
   Plot.addCurve(sizes, skalaTimes, "Skala", "green")
   Plot.plot()
 
+
+elseif args.command == "hull-size" then
+  local method = method_by_name[args.alg]
+  assert(method)
+
+  local nsizes = {}
+  local hsizes = {}
+
+  for n = min_input_size, max_input_size, step do
+    local points = Utils.generateRandomPointsInCircle(n, {x=0, y=0, r=100})
+    local hull = method(points)
+    table.insert(nsizes, n)
+    table.insert(hsizes, #hull)
+  end
+
+  Plot.init({title = "Convex Hull ("..args.alg..") (step: "..step..")", xlabel = "Input size", ylabel = "Hull size"})
+  Plot.addCurve(nsizes, hsizes, "Hull Size ("..args.alg..")", "red")
+  Plot.plot()
 
 elseif args.command == "compare" then
   local jarvisHull = ConvexHull.jarvisMarch(points)
@@ -63,7 +91,7 @@ elseif args.command == "compare" then
   Plot.init({title = "Convex Hull comparison", xlabel = "x", ylabel = "y"})
   Plot.addPointList(points)
   Plot.addPolygon(jarvisHull, "Jarvis March", "red")
-  Plot.addPolygon(skalaHull, "Skala", "green")
+  -- Plot.addPolygon(skalaHull, "Skala", "green")
   Plot.plot()
 
 
@@ -92,8 +120,8 @@ elseif args.command == "gif" then
     args.dir,
     args.delay
   )
-  print("Gif saved at " .. filename)
+  print("File saved at " .. filename)
 
   -- try to open gif in firefox
-  -- os.execute("firefox --new-window " .. filename)
+  os.execute("firefox --new-window " .. filename)
 end

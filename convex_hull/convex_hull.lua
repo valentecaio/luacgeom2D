@@ -1,6 +1,7 @@
 local Plot = require("matplotlua")
 local Utils = require("utils")
 
+-- we need the following state variables if we want to generate a step-by-step GIF
 local ConvexHull = {
   gif = false,      -- set to true before calling a method to generate figures
   hull = {},        -- convex hull points
@@ -13,7 +14,7 @@ local function _setup_plot()
   Plot.clear()
   Plot.addPointList(ConvexHull.points)
   Plot.addPolygon(ConvexHull.hull, "Convex Hull", "green")
-  Plot.saveState()
+  Plot.saveFrame()
 end
 
 -- initialize the convex hull with the given points
@@ -69,7 +70,7 @@ function ConvexHull.jarvisMarch(points)
     end
   end
 
-  -- sort the points based on polar angle from minYPoint
+  -- sort the points based on polar angle from the pivot
   table.sort(points, function(p1, p2)
     local orient = _orient(pivot, p1, p2)
     if orient == 0 then
