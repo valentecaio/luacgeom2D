@@ -82,4 +82,41 @@ function Utils.readPointsFromString(str)
   return points
 end
 
+-- read file line by line
+function Utils.readFile(path)
+  local file = io.open(path, "r")
+  local lines = {}
+  for line in file:lines() do
+    table.insert(lines, line)
+  end
+  file:close()
+  return lines
+end
+
+function Utils.writeFile(path, lines)
+  local file = io.open(path, "w")
+  for _, line in ipairs(lines) do
+    file:write(line .. '\n')
+  end
+  file:close()
+end
+
+-- Check if list2 is a subset of list1
+function Utils.listIsSubset(list1, list2)
+  local set = {}
+  for _, value in ipairs(list1) do
+    set[value] = true
+  end
+  for _, value in ipairs(list2) do
+    if not set[value] then
+      return false
+    end
+  end
+  return true
+end
+
+function Utils.listContains(list, value)
+  return Utils.listIsSubset(list, {value})
+end
+
 return Utils
