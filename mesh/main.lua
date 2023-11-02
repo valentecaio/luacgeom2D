@@ -91,30 +91,41 @@ function triangleCenter(p1, p2, p3)
 end
 
 function plotMesh(mesh)
-  -- vertices of mesh
-  Plot.addPointList(mesh.vertices, "black")
+  local graph = {
+    vertices = mesh.vertices,
+    edges = {},
+  }
 
   -- edges of mesh
   for _,face in ipairs(mesh.faces) do
-    Plot.addPolygon{mesh.vertices[face[1]], mesh.vertices[face[2]], mesh.vertices[face[3]]}
+    table.insert(graph.edges, {mesh.vertices[face[1]], mesh.vertices[face[2]]})
+    table.insert(graph.edges, {mesh.vertices[face[2]], mesh.vertices[face[3]]})
+    table.insert(graph.edges, {mesh.vertices[face[3]], mesh.vertices[face[1]]})
   end
+
+  Plot.addGraph(graph, "black")
 end
 
 function plotDual(mesh)
-  local points = {}
+  local graph = {
+    vertices = {},
+    edges = {},
+  }
+
   for _,face in ipairs(mesh.faces) do
     -- vertices of dual graph
-    table.insert(points, face.center)
+    table.insert(graph.vertices, face.center)
 
     -- edges of dual graph
     for i=1,3 do
       local opp_face = mesh.faces[face[i].opp_face]
       if opp_face then
-        Plot.addLine(face.center, opp_face.center, nil, "red")
+        table.insert(graph.edges, {face.center, opp_face.center})
       end
     end
   end
-  Plot.addPointList(points, "red")
+
+  Plot.addGraph(graph, "red")
 end
 
 
@@ -203,6 +214,7 @@ local dual = createDualGraphMesh(mesh)
 
 writeMesh(path_out, dual)
 
+Plot.init{title = "Dual Graph Mesh"}
 plotMesh(mesh)
 plotDual(dual)
 Plot.plot()

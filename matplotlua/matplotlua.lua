@@ -99,6 +99,13 @@ function Plot.addPolygon(points, label, color)
   })
 end
 
+function Plot.addGraph(graph, color)
+  Plot.addPointList(graph.vertices, color)
+  for _,edge in ipairs(graph.edges) do
+    Plot.addLine(edge[1], edge[2], nil, color)
+  end
+end
+
 -- dump plot data to a file with default or specified name
 function Plot.dumpStateToFile(filename)
   filename = filename or Plot.JSON_NAME
