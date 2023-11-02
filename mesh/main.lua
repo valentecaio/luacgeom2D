@@ -131,7 +131,7 @@ end
 
 ----------- DUAL GRAPH FUNCTIONS -----------
 
--- find face that shares two vertices with the current face_id
+-- find face that shares two vertices (vid1 and vid2) with the current face_id
 -- returns 0 if no such face exists
 function findOppositeFace(faces, face_id, vid1, vid2)
   for i, face in ipairs(faces) do
