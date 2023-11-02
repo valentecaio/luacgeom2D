@@ -110,37 +110,30 @@ end
 ]]--
 function createDualGraphMesh(vertices, faces)
   local mesh = {
-    vertices = {},
+    vertices = vertices,
     faces = {},
   }
 
-  -- VERTICES: for each vertex, find ANY adjacent face
-  for i, vertex in ipairs(vertices) do
-    table.insert(mesh.vertices, {
-      x = vertex.x,
-      y = vertex.y,
-      adj_face = findAdjacentFace(faces, i)
-    })
-  end
-  -- Utils.printTable(input.vertices)
+  for face_id, face in ipairs(faces) do
+    -- the three vertices of the face are adjacent to the face
+    mesh.vertices[face[1]].adj_face = face_id
+    mesh.vertices[face[2]].adj_face = face_id
+    mesh.vertices[face[3]].adj_face = face_id
 
-  -- FACES: for each face, find its 3 adjacent faces
-  -- an adjacent face is a face that shares two vertices with the current face
-  -- for each vertex of a face, we find the opoosite face id, which is
-  -- the face that shares the other two vertices with the current face
-  for j, face in ipairs(faces) do
+    -- for each vertex of a face, we find its opoosite face, which is
+    -- the face that shares the other two vertices with the current face
     table.insert(mesh.faces, {
       {
         vertex = face[1],
-        opp_face = findOppositeFace(faces, j, face[2], face[3]),
+        opp_face = findOppositeFace(faces, face_id, face[2], face[3]),
       },
       {
         vertex = face[2],
-        opp_face = findOppositeFace(faces, j, face[1], face[3]),
+        opp_face = findOppositeFace(faces, face_id, face[1], face[3]),
       },
       {
         vertex = face[3],
-        opp_face = findOppositeFace(faces, j, face[1], face[2]),
+        opp_face = findOppositeFace(faces, face_id, face[1], face[2]),
       },
     })
   end
