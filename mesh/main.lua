@@ -103,14 +103,18 @@ end
     },
   }
 ]]--
-function createDualGraphMesh(input)
+function createDualGraphMesh(vertices, faces)
+  local mesh = {
+    vertices = {},
+    faces = {},
+  }
+
   -- VERTICES: for each vertex, find ANY adjacent face
-  local vertices = {}
-  for i, vertex in ipairs(input.vertices) do
-    table.insert(vertices, {
+  for i, vertex in ipairs(vertices) do
+    table.insert(mesh.vertices, {
       x = vertex.x,
       y = vertex.y,
-      adj_face = findAdjacentFace(input.faces, i)
+      adj_face = findAdjacentFace(faces, i)
     })
   end
   -- Utils.printTable(input.vertices)
@@ -119,30 +123,25 @@ function createDualGraphMesh(input)
   -- an adjacent face is a face that shares two vertices with the current face
   -- for each vertex of a face, we find the opoosite face id, which is
   -- the face that shares the other two vertices with the current face
-  local faces = {}
-  for j, face in ipairs(input.faces) do
-    table.insert(faces, {
+  for j, face in ipairs(faces) do
+    table.insert(mesh.faces, {
       {
         vertex = face[1],
-        opp_face = findOppositeFace(input.faces, j, face[2], face[3]),
+        opp_face = findOppositeFace(faces, j, face[2], face[3]),
       },
       {
         vertex = face[2],
-        opp_face = findOppositeFace(input.faces, j, face[1], face[3]),
+        opp_face = findOppositeFace(faces, j, face[1], face[3]),
       },
       {
         vertex = face[3],
-        opp_face = findOppositeFace(input.faces, j, face[1], face[2]),
+        opp_face = findOppositeFace(faces, j, face[1], face[2]),
       },
     })
   end
   -- Utils.printTable(faces)
 
-  -- final adj mesh
-  return {
-    vertices = vertices,
-    faces = faces,
-  }
+  return mesh
 end
 
 
@@ -151,6 +150,6 @@ end
 local path_in = "malha.txt"
 local path_out = "malha_adj.txt"
 local input = parseInput(path_in)
-mesh = createDualGraphMesh(input)
+mesh = createDualGraphMesh(input.vertices, input.faces)
 writeOutput(path_out, mesh)
 print("wrote output to " .. path_out)
