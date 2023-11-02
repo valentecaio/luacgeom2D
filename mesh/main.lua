@@ -3,7 +3,6 @@
 package.path = package.path .. ";./?/?.lua"
 package.path = package.path .. ";../?/?.lua"
 
-local Plot = require("matplotlua")
 local Utils = require("utils")
 
 
