@@ -7,7 +7,13 @@ import json
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
 
+DEBUG = False
+
 def plot_from_json(json_data):
+    if DEBUG:
+        from pprint import pprint
+        pprint(json_data)
+
     plt.clf()
 
     for obj in json_data['points']:
