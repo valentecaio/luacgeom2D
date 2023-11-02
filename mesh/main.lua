@@ -9,8 +9,8 @@ local Plot = require("matplotlua")
 
 ----------- SCRIPT SETUP -----------
 
-local path_in  = arg[1] or "malha.txt"
-local path_out = arg[2] or "malha_adj.txt"
+local path_in  = arg[1] or "mesh.txt"
+local path_out = arg[2] or "mesh_adj.txt"
 
 
 ----------- AUXILIARY FUNCTIONS -----------
