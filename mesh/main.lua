@@ -7,6 +7,12 @@ local Plot = require("matplotlua")
 local Utils = require("utils")
 
 
+----------- SCRIPT SETUP -----------
+
+local path_in  = arg[1] or "malha.txt"
+local path_out = arg[2] or "malha_adj.txt"
+
+
 ----------- AUXILIARY FUNCTIONS -----------
 
 -- the first line contains the number of vertices (n) and the number of faces (m).
@@ -54,6 +60,14 @@ function writeOutput(path, mesh)
   Utils.writeFile(path, lines)
 end
 
+-- convert face to string for debugging
+function faceToString(face)
+  return "Face{" .. face[1] .. ", " .. face[2] .. ", " .. face[3] .. "}"
+end
+
+
+----------- DUAL GRAPH FUNCTIONS -----------
+
 -- find face that shares two vertices with the current face_id
 -- returns 0 if no such face exists
 function findOppositeFace(faces, face_id, vid1, vid2)
@@ -73,14 +87,6 @@ function findAdjacentFace(faces, vertex_id)
     end
   end
 end
-
--- convert face to string for debugging
-function faceToString(face)
-  return "Face{" .. face[1] .. ", " .. face[2] .. ", " .. face[3] .. "}"
-end
-
-
------------ DUAL GRAPH FUNCTIONS -----------
 
 --[[ example:
   mesh = {
@@ -147,8 +153,6 @@ end
 
 ----------- MAIN -----------
 
-local path_in = "malha.txt"
-local path_out = "malha_adj.txt"
 local input = parseInput(path_in)
 mesh = createDualGraphMesh(input.vertices, input.faces)
 writeOutput(path_out, mesh)
