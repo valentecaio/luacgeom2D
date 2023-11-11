@@ -82,6 +82,18 @@ function Utils.readPointsFromString(str)
   return points
 end
 
+function Utils.readPointsFromFile(path)
+  local points = {}
+  local lines = Utils.readFile(path)
+  for _, line in ipairs(lines) do
+    local x, y = line:match("(%d+)%s+(%d+)")
+    if x and y then
+      table.insert(points, {x = tonumber(x), y = tonumber(y)})
+    end
+  end
+  return points
+end
+
 -- read file line by line
 function Utils.readFile(path)
   local file = io.open(path, "r")
