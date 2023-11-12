@@ -14,7 +14,7 @@ DEBUG = false             -- print debug messages
 PLOT = false              -- plot each step of the algorithm
 plot_method = Plot.figure -- Plot.figure or Plot.plot
 
-local filepath = arg[1] or "nuvem1.txt"
+local filepath = arg[1] or "datasets/nuvem1.txt"
 
 
 ----------- MAIN -----------
