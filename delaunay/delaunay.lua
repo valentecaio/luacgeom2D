@@ -7,10 +7,8 @@ local Delaunay = {}
 
 -------- DEBUG --------
 
-local function debug_print(...)
-  if DEBUG then
-    print(...)
-  end
+local function _dprint(...)
+  if DEBUG then print(...) end
 end
 
 local function _plotbase(points, p, triangles)
@@ -187,7 +185,7 @@ function Delaunay.incremental(points)
 
   for pi,p in ipairs(points) do
     -- step 1: add a new point to the triangulation
-    debug_print("-------------------------- " .. pi .. " --------------------------")
+    _dprint("-------------------------- " .. pi .. " --------------------------")
     _plotstep1(points, pi, p, triangles)
 
 
@@ -198,10 +196,10 @@ function Delaunay.incremental(points)
         table.insert(bad_triangles, {index = ti, triangle = t})
       end
     end
-    debug_print("#bad_triangles = "..#bad_triangles)
+    _dprint("#bad_triangles = "..#bad_triangles)
     for i=#bad_triangles,1,-1 do
       table.remove(triangles, bad_triangles[i].index)
-      debug_print("removed triangle, #triangles = "..#triangles)
+      _dprint("removed triangle, #triangles = "..#triangles)
     end
     _plotstep2(points, pi, p, triangles, bad_triangles)
 
@@ -215,7 +213,7 @@ function Delaunay.incremental(points)
         end
       end
     end
-    debug_print("#polygon = "..#polygon)
+    _dprint("#polygon = "..#polygon)
     _plotstep3(points, pi, p, triangles, polygon)
 
 
@@ -226,8 +224,8 @@ function Delaunay.incremental(points)
       table.insert(new_triangles, t)
       table.insert(triangles, t)
     end
-    debug_print("#new_triangles = "..#new_triangles)
-    debug_print("#triangles = "..#triangles)
+    _dprint("#new_triangles = "..#new_triangles)
+    _dprint("#triangles = "..#triangles)
     _plotstep4(points, pi, p, triangles, new_triangles)
   end
 
