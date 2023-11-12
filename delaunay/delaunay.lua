@@ -19,11 +19,13 @@ local function _plotbase(points, p, triangles)
   Plot.addPoint(p.x, p.y, "red")
 end
 
-local function _plotcircles(points, i, p, triangles)
+local function _plotcircles(points, i, p, triangles, bad_triangles)
+  if not PLOT then return end
   Plot.init{title = "Delaunay Triangulation (point " .. i .. ", circumcircles)"}
   _plotbase(points, p, triangles)
   for _,t in ipairs(bad_triangles) do
-    Plot.addCircle(t.circumcircle, nil, "red")
+    Plot.addPolygon(t.triangle.vertices, nil, "red")
+    Plot.addCircle(t.triangle.circumcircle, nil, "green")
   end
   plot_method("figures/delaunay_" .. i .. "_step2_circumcircles.png")
 end
@@ -202,6 +204,7 @@ function Delaunay.incremental(points)
       _dprint("removed triangle, #triangles = "..#triangles)
     end
     _plotstep2(points, pi, p, triangles, bad_triangles)
+    -- _plotcircles(points, pi, p, triangles, bad_triangles)
 
 
     -- step 3: find the polygonal hole left by the bad triangles
