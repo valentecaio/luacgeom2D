@@ -1,3 +1,6 @@
+package.path = package.path .. ";../matplotlua/?.lua"
+package.path = package.path .. ";./?.lua"
+
 local Plot = require("matplotlua")
 local Utils = require("utils")
 
@@ -8,8 +11,9 @@ local ConvexHull = {
   points = {},      -- input points
 }
 
-------- PRIVATE -------
+------- AUXILIAR -------
 
+-- save a frame of the plot to generate a GIF
 local function _setup_plot()
   Plot.clear()
   Plot.addPointList(ConvexHull.points)
@@ -48,7 +52,7 @@ local function _orient(p1, p2, p3)
 end
 
 
-------- PUBLIC -------
+------- ALGORITHMS -------
 
 -- Time Complexity: O(nh), where "h" is the number of vertices on the convex hull.
 -- Proposed by R.A. Jarvis in 1973.

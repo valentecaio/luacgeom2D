@@ -1,11 +1,12 @@
-package.path = package.path .. ";../?/?.lua"
+package.path = package.path .. ";./?.lua" -- include own dir in package path
+
 local Utils = require("utils")
 local ConvexHull = require("convex_hull")
 
 local EnclosingCircle = {}
 
 
-------- PRIVATE METHODS -------
+------- AUXILIARY FUNCTIONS -------
 
 -- returns the euclidean distance between two points
 local function _eucl_distance(p1, p2)
@@ -79,8 +80,7 @@ local function _makeCircle(boundary)
   end
 end
 
-
-------- PUBLIC METHODS -------
+------- ALGORITHMS -------
 
 -- dumbest way to find any enclosing circle
 -- the returned circle encloses the rectangle containing all the points
@@ -175,7 +175,7 @@ function EnclosingCircle.smolik(points)
   return EnclosingCircle.welzl(convex_hull)
 end
 
--- check if a circle encloses a given set of points
+-- "brute force" check if a circle encloses a given set of points
 function EnclosingCircle.validateCircle(circle, points)
   for _, point in ipairs(points) do
     if _eucl_distance(circle, point) > circle.r then

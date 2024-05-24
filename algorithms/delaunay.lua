@@ -1,11 +1,20 @@
+package.path = package.path .. ";../matplotlua/?.lua"
+package.path = package.path .. ";./?.lua"
 
-local Plot = require "matplotlua"
-local Utils = require "utils"
+local Plot = require("matplotlua")
+local Utils = require("utils")
 
 local Delaunay = {}
 
 
--------- DEBUG --------
+-------- DEFAULT SCRIPT SETUP --------
+
+DEBUG = DEBUG or false                   -- print debug messages
+PLOT = PLOT or false                     -- plot each step, useful for debugging
+OUT_DIR = OUT_DIR or "../figures/"       -- output directory for plots
+
+
+-------- DEBUG AND PLOT --------
 
 local function _dprint(...)
   if DEBUG then print(...) end
@@ -27,14 +36,14 @@ local function _plotcircles(points, i, p, triangles, bad_triangles)
     Plot.addPolygon(t.triangle.vertices, nil, "red")
     Plot.addCircle(t.triangle.circumcircle, nil, "green")
   end
-  plot_method("figures/delaunay_" .. i .. "_step2_circumcircles.png")
+  Plot.saveFrame()
 end
 
 local function _plotstep1(points, i, p, triangles)
   if not PLOT then return end
   Plot.init{title = "Delaunay Triangulation (point " .. i .. ", step 1)"}
   _plotbase(points, p, triangles)
-  plot_method("figures/delaunay_" .. i .. "_step1.png")
+  Plot.saveFrame()
 end
 
 local function _plotstep2(points, i, p, triangles, bad_triangles)
@@ -44,7 +53,7 @@ local function _plotstep2(points, i, p, triangles, bad_triangles)
   for _,t in ipairs(bad_triangles) do
     Plot.addPolygon(t.triangle.vertices, nil, "red")
   end
-  plot_method("figures/delaunay_" .. i .. "_step2.png")
+  Plot.saveFrame()
 end
 
 local function _plotstep3(points, i, p, triangles, polygon)
@@ -54,7 +63,7 @@ local function _plotstep3(points, i, p, triangles, polygon)
   for _,e in ipairs(polygon) do
     Plot.addLine(e[1], e[2], nil, "red")
   end
-  plot_method("figures/delaunay_" .. i .. "_step3.png")
+  Plot.saveFrame()
 end
 
 local function _plotstep4(points, i, p, triangles, new_triangles)
@@ -64,7 +73,7 @@ local function _plotstep4(points, i, p, triangles, new_triangles)
   for _,t in ipairs(new_triangles) do
     Plot.addPolygon(t.vertices, nil, "red")
   end
-  plot_method("figures/delaunay_" .. i .. "_step4.png")
+  Plot.saveFrame()
 end
 
 local function _plotstep5(points, triangles, removed_triangles)
@@ -77,7 +86,7 @@ local function _plotstep5(points, triangles, removed_triangles)
   for _,t in ipairs(removed_triangles) do
     Plot.addPolygon(t.vertices, nil, "red")
   end
-  plot_method("figures/delaunay_final_step.png")
+  Plot.saveFrame()
 end
 
 local function _plotresults(points, triangles)
@@ -87,7 +96,7 @@ local function _plotresults(points, triangles)
   for _,t in ipairs(triangles) do
     Plot.addPolygon(t.vertices, nil, "blue")
   end
-  plot_method("figures/delaunay_results.png")
+  Plot.saveFrame()
 end
 
 

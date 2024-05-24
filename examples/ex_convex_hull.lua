@@ -1,13 +1,15 @@
 #!/usr/bin/lua
 
-package.path = package.path .. ";./?/?.lua"
-package.path = package.path .. ";../?/?.lua"
+package.path = package.path .. ";../algorithms/?.lua"
+package.path = package.path .. ";../matplotlua/?.lua"
 
 local Plot = require("matplotlua")
 local Utils = require("utils")
 local ConvexHull = require("convex_hull")
+
 local argparse = require("argparse")
 
+-- parameters for the analysis
 local min_input_size = 10
 local max_input_size = 20000
 local step = 100
@@ -24,7 +26,7 @@ parser:option("-a --alg",    "Algorithm name, one of [ jarvis | skala ]")
 parser:option("-i --input",  "Data Set input file path. Omit this option to use a random dataset.")
 parser:option("-n --npoints","Number of points in the random dataset.", "100")
 parser:option("-d --delay",  "Delay of gif image transition in ms.", "50")
-parser:option("--dir",       "Output directory for figures.", "figures/")
+parser:option("--dir",       "Output directory for figures.", "../figures/")
 local args = parser:parse()
 
 -- read dataset from file or generate random dataset
@@ -64,6 +66,7 @@ if args.command == "complexity" then
   Plot.addCurve(sizes, jarvisMarchTimes, "Jarvis March", "red")
   Plot.addCurve(sizes, skalaTimes, "Skala", "green")
   Plot.plot()
+  -- Plot.figure("../figures/convex_hull-complexity.png")
 
 
 elseif args.command == "hull-size" then
@@ -83,6 +86,8 @@ elseif args.command == "hull-size" then
   Plot.init({title = "Convex Hull ("..args.alg..") (step: "..step..")", xlabel = "Input size", ylabel = "Hull size"})
   Plot.addCurve(nsizes, hsizes, "Hull Size ("..args.alg..")", "red")
   Plot.plot()
+  -- Plot.figure("../figures/convex_hull-hull_size.png")
+
 
 elseif args.command == "compare" then
   local jarvisHull = ConvexHull.jarvisMarch(points)
@@ -91,8 +96,9 @@ elseif args.command == "compare" then
   Plot.init({title = "Convex Hull comparison", xlabel = "x", ylabel = "y"})
   Plot.addPointList(points)
   Plot.addPolygon(jarvisHull, "Jarvis March", "red")
-  -- Plot.addPolygon(skalaHull, "Skala", "green")
+  Plot.addPolygon(skalaHull, "Skala", "green")
   Plot.plot()
+  -- Plot.figure("../figures/convex_hull-compare.png")
 
 
 elseif args.command == "algorithm" then
@@ -105,6 +111,7 @@ elseif args.command == "algorithm" then
   Plot.addPointList(points)
   Plot.addPolygon(hull, args.alg, "green")
   Plot.plot()
+  -- Plot.figure("../figures/convex_hull.png")
 
 
 elseif args.command == "gif" then
@@ -123,5 +130,5 @@ elseif args.command == "gif" then
   print("File saved at " .. filename)
 
   -- try to open gif in firefox
-  os.execute("firefox --new-window " .. filename)
+  -- os.execute("firefox --new-window " .. filename)
 end

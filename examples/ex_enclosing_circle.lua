@@ -1,7 +1,8 @@
 #!/usr/bin/lua
 
-package.path = package.path .. ";../?/?.lua" -- necessary to launch the script from the enclosing folder
-package.path = package.path .. ";./?/?.lua"  -- necessary to launch the script from the root folder
+package.path = package.path .. ";../algorithms/?.lua"
+package.path = package.path .. ";../matplotlua/?.lua"
+
 local Plot = require("matplotlua")
 local Utils = require("utils")
 local EnclosingCircle = require("enclosing_circle")
@@ -10,9 +11,10 @@ local ConvexHull = require("convex_hull")
 local cmds = {"complexity", "compare", "dumb", "heuristic", "bruteforce", "welzl", "smolik"}
 local cmds_str = table.concat(cmds, "|")
 local function print_help_and_quit()
-  print("Usage: lua " .. arg[0] .. " <method> [N]\
-  where N is the number of random points in the dataset (optional, default: 100)\
-  and <method> is one of [" .. cmds_str .. "]")
+  print("Usage: lua " .. arg[0] .. " <method> [N] [output_file]\
+    N: number of random points in the dataset (optional, default: 100)\
+    output: path of the output file (optional, default: do not save any file)\
+    method: one of [" .. cmds_str .. "]")
   os.exit()
 end
 
@@ -97,7 +99,9 @@ elseif arg[1] == "compare" then
   -- Plot.addCircle(circle, "Brute Force", "blue")
 
   Plot.plot()
+  -- Plot.figure("../figures/enclosing_circle-compare.png")
 
+  
 else
   local method
   if arg[1] == "dumb" then
@@ -121,5 +125,10 @@ else
   Plot.init{title = "Enclosing Circle (method: " .. arg[1] .. ", N: " .. N .. ")"}
   Plot.addPointList(rand_points)
   Plot.addCircle(circle)
-  Plot.plot()
+  if arg[3] then
+    Plot.figure(arg[3])
+    print("Saved plot to " .. arg[3])
+  else
+    Plot.plot()
+  end
 end

@@ -115,14 +115,18 @@ function Plot.dumpStateToFile(filename)
   file:close()
 end
 
+-- if use_file is true, write state to a JSON file and call Python script with file
+-- otherwise, send JSON data through a pipe to the Python script
 function Plot.plot(use_file)
   if use_file then
     -- write to a file and call Python script with file
+    -- useful for debugging
     Plot.dumpStateToFile()
     local command = 'python "' .. Plot.SCRIPT_PATH .. '" ' .. Plot.JSON_NAME
     os.execute(command)
   else
     -- call Python script through a pipe with JSON data
+    -- faster than writing to a file
     local json_data = cjson.encode(Plot.state)
     local pipe = io.popen('python "' .. Plot.SCRIPT_PATH .. '"', 'w')
     pipe:write(json_data)
@@ -139,14 +143,20 @@ end
 -- plot step-by-step figures of the state history
 -- generate a GIF animation in the end
 function Plot.generateGif(title, dir, delay)
-  -- clear figures dir
-  os.execute("rm " .. dir .. "*.png")
+  local now = os.date("%Y-%m-%d-%H-%M-%S")
+  local filename = dir .. "plot-" .. now .. ".gif"
+
+  -- create subdir for these images
+  dir = dir .. "/" .. now .. "/"
+  os.execute("mkdir -p " .. dir)
 
   -- generate new figures
   Plot.saveFrame()
   for i,state in ipairs(Plot.state_history) do
     Plot.state = state
-    Plot.state.title = title .. " (t = " .. i .. ")"
+    if title then
+      Plot.state.title = title .. " (t = " .. i .. ")"
+    end
     Plot.figure(dir .. i .. ".png")
   end
   -- create copies of last picture to hang on the last frame for a while
@@ -155,7 +165,6 @@ function Plot.generateGif(title, dir, delay)
   end
 
   -- generate GIF from figures
-  local filename = dir .. "plot-" .. os.date("%Y-%m-%d-%H-%M-%S") .. ".gif"
   os.execute("convert -delay " .. delay .. " -loop 0 $(ls -v " .. dir .. "*.png) " .. filename)
   -- convert -delay 50 -loop 0 $(ls -v *.png) animation.gif
   return filename

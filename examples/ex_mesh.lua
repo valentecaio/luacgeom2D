@@ -1,7 +1,7 @@
 #!/usr/bin/lua
 
-package.path = package.path .. ";./?/?.lua"
-package.path = package.path .. ";../?/?.lua"
+package.path = package.path .. ";../algorithms/?.lua"
+package.path = package.path .. ";../matplotlua/?.lua"
 
 local Utils = require("utils")
 local Plot = require("matplotlua")
@@ -9,8 +9,8 @@ local Plot = require("matplotlua")
 
 ----------- SCRIPT SETUP -----------
 
-local path_in  = arg[1] or "mesh.txt"
-local path_out = arg[2] or "mesh_adj.txt"
+local path_in  = arg[1] or "../datasets/mesh.txt"
+local path_out = arg[2] or "../datasets/mesh_adj.txt"
 
 
 ----------- AUXILIARY FUNCTIONS -----------
@@ -218,4 +218,5 @@ Plot.init{title = "Dual Graph Mesh"}
 plotMesh(mesh)
 plotDual(dual)
 Plot.plot()
+-- Plot.figure("../figures/dual_mesh.png")
 
