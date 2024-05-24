@@ -1,11 +1,11 @@
 ## Install Python deps
-    $ pip install matplotlib  
+    pip install matplotlib  
 
 ## Install Lua deps
-    $ sudo apt-get install lua-cjson  
-    $ sudo luarocks install argparse  
+    apt-get install lua-cjson  
+    luarocks install argparse  
 
 ## Install extra tools
 We use ImageMagick to generate gif images:   
 
-    $ sudo apt install imagemagick-6.q16  
+    apt install imagemagick-6.q16  
