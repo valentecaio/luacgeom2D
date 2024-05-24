@@ -1,4 +1,4 @@
-## luacomputgeom2D
+## Luacgeom2D
 
 This repository contains Lua implementations of some 2D computational geometry algorithms that I developed during my master's degree classes oriented by Prof. [Waldemar Celes](https://web.tecgraf.puc-rio.br/~celes/), such as:  
 
