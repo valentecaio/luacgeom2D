@@ -10,12 +10,15 @@ This repository contains Lua implementations of some 2D computational geometry a
 It also includes the `matplotlua`, a Lua binding to the matplotlib library.  
   
 It is organized as follows:  
-- `algorithms/` - Contains the implementation of the algorithms;
-- `datasets/` - Contains datasets used in the examples;
-- `examples/` - Contains usage examples of each algorithm;
-- `figures/` - Contains images and animations of the results. Also used as output dir for the examples.
-- `matplotlua/` - Contains the matplotlua library;
-- `reports/` - Contains reports on the algorithms implementations and their complexity.
+```
+.
+├── algorithms/    # Implementations of the algorithms.
+├── datasets/      # Datasets used in the examples.
+├── examples/      # Usage examples for each algorithm.
+├── figures/       # Output directory for results (images and animations).
+├── matplotlua/    # matplotlua library.
+└── reports/       # Reports on the algorithms implementations.
+```
 
 ---
 ### Installation
